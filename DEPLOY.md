@@ -96,6 +96,9 @@ FEISHU_TABLE_ID
 /robots.txt
 /sitemap.xml
 /healthz
+/api/health/feishu?token=你的查询密码
 ```
 
 上线后可以把 `https://你的域名/sitemap.xml` 提交到 Google Search Console 和百度搜索资源平台。
+
+飞书诊断接口只返回配置是否存在、字段数量和字段名，不返回 App Secret。正式投放前建议把 `LEADS_TOKEN` 设置为随机长密码。

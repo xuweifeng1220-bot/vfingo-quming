@@ -2,7 +2,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const { loadEnv } = require("./lib/env");
-const { pushLeadToFeishu } = require("./lib/feishu");
+const { diagnoseFeishu, pushLeadToFeishu } = require("./lib/feishu");
 
 loadEnv();
 
@@ -131,6 +131,27 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (req.method === "GET" && url.pathname === "/favicon.ico") {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/health/feishu") {
+      if (LEADS_TOKEN && url.searchParams.get("token") !== LEADS_TOKEN) {
+        writeJson(res, 401, { ok: false, error: "Unauthorized" });
+        return;
+      }
+
+      try {
+        const diagnostics = await diagnoseFeishu();
+        writeJson(res, diagnostics.ok ? 200 : 500, diagnostics);
+      } catch (error) {
+        writeJson(res, 500, { ok: false, error: error.message });
+      }
+      return;
+    }
+
     if (req.method === "GET" && url.pathname === "/robots.txt") {
       const origin = getOrigin(req);
       writeText(
@@ -177,6 +198,12 @@ const server = http.createServer(async (req, res) => {
       let feishu = { skipped: true };
       try {
         feishu = await pushLeadToFeishu(lead);
+        if (feishu.skipped) {
+          console.warn(`Feishu write skipped: ${feishu.reason || "unknown reason"}`);
+        } else {
+          const recordId = feishu.data?.record?.record_id || feishu.data?.record_id || "unknown";
+          console.log(`Feishu write success: ${recordId}`);
+        }
       } catch (error) {
         console.error(`Feishu write failed: ${error.message}`);
         feishu = { skipped: false, error: error.message };
