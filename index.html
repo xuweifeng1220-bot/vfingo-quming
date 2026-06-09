@@ -1,0 +1,1235 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>托业成绩助手｜托业提分与海外报名方案咨询</title>
+    <meta
+      name="description"
+      content="面向外派、留学、海外求职和公司提交场景，提供海外托业官方报名入口核对、成绩周期、提交时间倒排与方案咨询。"
+    />
+    <style>
+      :root {
+        --bg: #f4f7f8;
+        --ink: #162126;
+        --muted: #5c6b73;
+        --line: #d9e2e6;
+        --panel: #ffffff;
+        --accent: #0d7c66;
+        --accent-dark: #075c4b;
+        --soft: #e7f3ef;
+        --warn: #8a5b12;
+        --warn-bg: #fff5df;
+        --shadow: 0 18px 48px rgba(18, 42, 54, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(180deg, rgba(13, 124, 102, 0.08), transparent 420px),
+          var(--bg);
+        color: var(--ink);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Microsoft YaHei", sans-serif;
+        line-height: 1.65;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid rgba(217, 226, 230, 0.8);
+        background: rgba(244, 247, 248, 0.88);
+        backdrop-filter: blur(14px);
+      }
+
+      .nav {
+        width: min(1180px, calc(100% - 48px));
+        margin: 0 auto;
+        min-height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        font-weight: 750;
+        letter-spacing: 0;
+      }
+
+      .brand small {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+      }
+
+      .button {
+        appearance: none;
+        border: 0;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #fff;
+        padding: 12px 18px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        transition:
+          background 0.2s ease,
+          transform 0.2s ease;
+      }
+
+      .button:hover {
+        background: var(--accent-dark);
+        transform: translateY(-1px);
+      }
+
+      .button.secondary {
+        background: #fff;
+        color: var(--accent-dark);
+        border: 1px solid var(--line);
+      }
+
+      main {
+        width: min(1180px, calc(100% - 48px));
+        margin: 0 auto;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) 420px;
+        gap: 42px;
+        align-items: start;
+        padding: 72px 0 54px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        gap: 8px;
+        color: var(--accent-dark);
+        background: var(--soft);
+        border: 1px solid rgba(13, 124, 102, 0.16);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      h1,
+      h2,
+      h3 {
+        line-height: 1.16;
+        margin: 0;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        margin-top: 22px;
+        font-size: clamp(42px, 5.6vw, 68px);
+        max-width: 780px;
+      }
+
+      .lead {
+        color: var(--muted);
+        font-size: 20px;
+        max-width: 720px;
+        margin: 24px 0 0;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .hero-visual {
+        margin-top: 28px;
+        max-width: 780px;
+      }
+
+      .hero-photo {
+        min-height: 210px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: #d8e5e7;
+      }
+
+      .hero-photo img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+
+      .form-card {
+        position: sticky;
+        top: 86px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+        padding: 24px;
+      }
+
+      .form-card h2 {
+        font-size: 24px;
+      }
+
+      .form-card p {
+        color: var(--muted);
+        margin: 8px 0 18px;
+        font-size: 14px;
+      }
+
+      .field-grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        font-size: 13px;
+        color: #314148;
+        font-weight: 700;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px 13px;
+        color: var(--ink);
+        background: #fff;
+        font: inherit;
+        font-size: 15px;
+      }
+
+      textarea {
+        min-height: 82px;
+        resize: vertical;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: 3px solid rgba(13, 124, 102, 0.16);
+        border-color: var(--accent);
+      }
+
+      .form-card .button {
+        width: 100%;
+        margin-top: 16px;
+      }
+
+      .form-note {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 12px;
+      }
+
+      .result {
+        display: none;
+        margin-top: 14px;
+        border: 1px solid rgba(13, 124, 102, 0.24);
+        background: var(--soft);
+        border-radius: 8px;
+        padding: 12px;
+        color: var(--accent-dark);
+        font-size: 13px;
+      }
+
+      .success-panel {
+        display: none;
+        margin-top: 16px;
+        border: 1px solid rgba(13, 124, 102, 0.24);
+        background: var(--soft);
+        border-radius: 10px;
+        padding: 16px;
+      }
+
+      .success-panel h3 {
+        font-size: 18px;
+        margin-bottom: 6px;
+      }
+
+      .success-panel p {
+        color: var(--muted);
+        margin: 0 0 12px;
+      }
+
+      .wechat-qr {
+        display: grid;
+        grid-template-columns: 104px minmax(0, 1fr);
+        gap: 14px;
+        align-items: center;
+      }
+
+      .wechat-qr img {
+        width: 104px;
+        height: 104px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        object-fit: cover;
+        background: #fff;
+      }
+
+      .qr-placeholder {
+        width: 104px;
+        height: 104px;
+        border-radius: 8px;
+        border: 1px dashed rgba(13, 124, 102, 0.45);
+        background:
+          linear-gradient(45deg, rgba(13, 124, 102, 0.12) 25%, transparent 25%),
+          linear-gradient(-45deg, rgba(13, 124, 102, 0.12) 25%, transparent 25%),
+          #fff;
+        background-size: 16px 16px;
+        display: grid;
+        place-items: center;
+        color: var(--accent-dark);
+        font-size: 12px;
+        text-align: center;
+        padding: 8px;
+      }
+
+      section {
+        padding: 42px 0;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        align-items: end;
+        margin-bottom: 22px;
+      }
+
+      .section-head h2 {
+        font-size: 34px;
+      }
+
+      .section-head p {
+        color: var(--muted);
+        margin: 0;
+        max-width: 520px;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 20px;
+      }
+
+      .card h3 {
+        font-size: 19px;
+        margin-bottom: 10px;
+      }
+
+      .card p {
+        color: var(--muted);
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .service-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .link-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .official-link {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 18px;
+        text-decoration: none;
+        transition:
+          border-color 0.2s ease,
+          transform 0.2s ease;
+      }
+
+      .official-link:hover {
+        border-color: rgba(13, 124, 102, 0.45);
+        transform: translateY(-1px);
+      }
+
+      .official-link strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .official-link span {
+        color: var(--muted);
+        display: block;
+        font-size: 14px;
+      }
+
+      .service {
+        border-left: 4px solid var(--accent);
+        background: var(--panel);
+        border-radius: 8px;
+        padding: 18px;
+      }
+
+      .service strong {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .service span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .region-wrap {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        text-align: left;
+        vertical-align: top;
+        padding: 16px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      th {
+        background: #eef4f5;
+        color: #314148;
+        font-size: 13px;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      td span {
+        color: var(--muted);
+      }
+
+      .region-cards {
+        display: none;
+        gap: 12px;
+      }
+
+      .region-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+      }
+
+      .region-card h3 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+
+      .region-card dl {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+      }
+
+      .region-card div {
+        display: grid;
+        gap: 2px;
+      }
+
+      .region-card dt {
+        color: #314148;
+        font-weight: 700;
+        font-size: 13px;
+      }
+
+      .region-card dd {
+        color: var(--muted);
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .source-link {
+        color: var(--accent-dark);
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .source-link:hover {
+        text-decoration: underline;
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        counter-reset: steps;
+      }
+
+      .step {
+        position: relative;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 20px;
+        counter-increment: steps;
+      }
+
+      .step::before {
+        content: counter(steps, decimal-leading-zero);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--soft);
+        color: var(--accent-dark);
+        font-weight: 800;
+        margin-bottom: 18px;
+      }
+
+      .faq {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      details {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px 18px;
+      }
+
+      summary {
+        cursor: pointer;
+        font-weight: 750;
+      }
+
+      details p {
+        color: var(--muted);
+        margin: 10px 0 0;
+      }
+
+      .final-cta {
+        margin: 28px 0 70px;
+        padding: 32px;
+        border-radius: 10px;
+        background: #102f33;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .final-cta h2 {
+        font-size: 30px;
+        margin-bottom: 8px;
+      }
+
+      .final-cta p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.76);
+      }
+
+      .final-cta .button {
+        background: #fff;
+        color: #102f33;
+        flex: 0 0 auto;
+      }
+
+      footer {
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        padding: 24px 0 36px;
+        font-size: 13px;
+      }
+
+      @media (max-width: 980px) {
+        .nav {
+          width: min(100% - 32px, 1180px);
+        }
+
+        .nav-links {
+          display: none;
+        }
+
+        main {
+          width: min(100% - 32px, 1180px);
+        }
+
+        .hero {
+          grid-template-columns: 1fr;
+          padding-top: 42px;
+        }
+
+        .form-card {
+          position: static;
+          order: 2;
+        }
+
+        .hero-visual,
+        .cards,
+        .service-grid,
+        .link-grid,
+        .steps,
+        .faq {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .section-head {
+          display: grid;
+        }
+      }
+
+      @media (max-width: 680px) {
+        main,
+        .nav {
+          width: min(100% - 24px, 1180px);
+        }
+
+        .brand small {
+          display: none;
+        }
+
+        .hero {
+          gap: 26px;
+          padding: 32px 0 30px;
+        }
+
+        h1 {
+          font-size: 36px;
+        }
+
+        .lead {
+          font-size: 17px;
+        }
+
+        .cards,
+        .service-grid,
+        .link-grid,
+        .steps,
+        .faq {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-photo {
+          min-height: 190px;
+        }
+
+        .hero-actions {
+          display: grid;
+        }
+
+        .section-head h2 {
+          font-size: 28px;
+        }
+
+        .region-wrap {
+          display: none;
+        }
+
+        .region-cards {
+          display: grid;
+        }
+
+        .final-cta {
+          display: grid;
+          padding: 24px;
+          margin-bottom: 48px;
+        }
+
+        .final-cta .button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav" aria-label="主导航">
+        <div class="brand">
+          <span>托业成绩助手</span>
+          <small>托业提分与海外报名方案咨询</small>
+        </div>
+        <div class="nav-links">
+          <a href="#service">服务内容</a>
+          <a href="#official-sites">官方入口</a>
+          <a href="#regions">地区信息</a>
+          <a href="#faq">常见问题</a>
+          <a class="button" href="#consult">提交需求</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" id="top">
+        <div>
+          <span class="eyebrow">托业提分 · 海外报名 · 成绩提交</span>
+          <h1>托业成绩临近提交？匹配提分与海外报名方案。</h1>
+          <p class="lead">
+            目前主要支持托业 TOEIC。面向外派、留学、海外求职和公司提交场景，围绕目标分数、最晚提交时间和德国/西班牙等海外报名路径，匹配更适合的提分与报名方案。
+          </p>
+
+          <div class="hero-actions">
+            <a class="button" href="#consult">提交需求，获取方案</a>
+            <a class="button secondary" href="#service">了解服务内容</a>
+          </div>
+
+          <div class="hero-visual" aria-label="托业报名咨询场景">
+            <div class="hero-photo">
+              <img
+                src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80"
+                alt="桌面上的文件、电脑和考试资料"
+              />
+            </div>
+          </div>
+        </div>
+
+        <aside class="form-card" id="consult" aria-label="需求提交表单">
+          <h2>提交你的托业需求</h2>
+          <p>留下关键信息后，我们会根据目标分数和提交时间沟通方案。</p>
+
+          <form id="leadForm">
+            <div class="field-grid">
+              <label>
+                想要的目标分数
+                <select name="targetScore" required>
+                  <option value="">请选择</option>
+                  <option>500+</option>
+                  <option>600+</option>
+                  <option>700+</option>
+                  <option>800+</option>
+                  <option>900+</option>
+                  <option>其他分数</option>
+                </select>
+              </label>
+
+              <label>
+                当前成绩/基础
+                <input
+                  name="currentScore"
+                  required
+                  placeholder="例如：暂无成绩 / 约500分 / 上次620 / 不确定"
+                />
+              </label>
+
+              <label>
+                最晚提交时间
+                <select name="deadline" required>
+                  <option value="">请选择</option>
+                  <option>15天内</option>
+                  <option>30天内</option>
+                  <option>45天内</option>
+                  <option>60天内</option>
+                  <option>60天以上</option>
+                  <option>只是先了解</option>
+                </select>
+              </label>
+
+              <label>
+                用途
+                <select name="purpose" required>
+                  <option value="">请选择</option>
+                  <option>外派</option>
+                  <option>留学申请</option>
+                  <option>公司入职/晋升</option>
+                  <option>海外求职</option>
+                  <option>学校要求</option>
+                  <option>其他</option>
+                </select>
+              </label>
+
+              <label>
+                联系方式（微信号或手机号）
+                <input
+                  name="contact"
+                  required
+                  inputmode="text"
+                  pattern="(^1[3-9]\d{9}$)|(^\+?[0-9][0-9\s-]{6,18}$)|(^[a-zA-Z][-_a-zA-Z0-9]{5,19}$)"
+                  title="请填写微信号或手机号。微信号需以字母开头，6-20位；手机号可填写中国大陆手机号或带区号号码。"
+                  placeholder="微信号或手机号"
+                />
+              </label>
+
+              <label>
+                需求说明
+                <textarea
+                  name="message"
+                  placeholder="例如：公司要求月底前提交；目前暂无成绩；希望了解德国/西班牙是否有更快安排。"
+                ></textarea>
+              </label>
+            </div>
+
+            <button class="button" type="submit">提交需求</button>
+            <div class="form-note">
+              提交后顾问会根据你的目标分数和时间节点继续沟通。
+            </div>
+            <div class="result" id="formResult"></div>
+            <div class="success-panel" id="successPanel">
+              <h3>需求已提交</h3>
+              <p>请扫码添加顾问微信，发送“托业”，我们会根据你的目标分数和提交时间继续沟通。</p>
+              <div class="wechat-qr">
+                <img
+                  src="assets/wechat-qr.png"
+                  alt="微信二维码"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';"
+                />
+                <div class="qr-placeholder" style="display: none;">微信二维码<br />待放置</div>
+                <span>扫码添加微信后，请备注“托业 + 目标分数 + 提交时间”。</span>
+              </div>
+            </div>
+          </form>
+        </aside>
+      </section>
+
+      <section aria-labelledby="audience-title">
+        <div class="section-head">
+          <h2 id="audience-title">适合哪些人</h2>
+          <p>先把目标分数、提交时间和海外报名路径讲清楚，再沟通适合你的方案。</p>
+        </div>
+
+        <div class="cards">
+          <article class="card">
+            <h3>外派员工</h3>
+            <p>公司突然要求 TOEIC 成绩，需要尽快确认提分路径、报名安排和提交节点。</p>
+          </article>
+          <article class="card">
+            <h3>留学申请人</h3>
+            <p>学校或项目接受托业成绩，需要核对成绩形式、提交要求和时间安排。</p>
+          </article>
+          <article class="card">
+            <h3>海外求职者</h3>
+            <p>岗位要求语言成绩，希望更快安排考试并提高按时提交成绩的机会。</p>
+          </article>
+          <article class="card">
+            <h3>公司提交场景</h3>
+            <p>入职、晋升、派遣、项目资质等场景，需要先判断分数目标和成绩形式。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="service" aria-labelledby="service-title">
+        <div class="section-head">
+          <h2 id="service-title">我们帮你确认什么</h2>
+          <p>围绕托业目标分数、提交时间和海外报名路径，先把可执行方案梳理清楚。</p>
+        </div>
+
+        <div class="service-grid">
+          <div class="service">
+            <strong>快速提分方案匹配</strong>
+            <span>根据目标分数、当前基础和剩余时间，沟通更适合的提分路径。</span>
+          </div>
+          <div class="service">
+            <strong>海外报名协助</strong>
+            <span>围绕德国、西班牙等海外地区，协助核对报名入口、考试类型和提交要求。</span>
+          </div>
+          <div class="service">
+            <strong>提交时间倒排</strong>
+            <span>结合公司、学校或项目要求，倒推出报名、考试、出分和提交节点。</span>
+          </div>
+          <div class="service">
+            <strong>目标分数沟通</strong>
+            <span>明确你需要达到的分数线，判断当前时间窗口内应优先走哪种方案。</span>
+          </div>
+          <div class="service">
+            <strong>用途核对</strong>
+            <span>根据外派、留学、求职或公司提交要求，提醒需要注意的成绩形式。</span>
+          </div>
+          <div class="service">
+            <strong>顾问对接</strong>
+            <span>提交需求后由顾问继续沟通服务范围、价格和预计周期。</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="official-sites" aria-labelledby="official-sites-title">
+        <div class="section-head">
+          <h2 id="official-sites-title">官方入口导航</h2>
+          <p>以下链接用于核对报名、成绩、EPN 和地区承办信息。本站只做信息整理与咨询，不替代官方页面。</p>
+        </div>
+
+        <div class="link-grid">
+          <a class="official-link" href="https://www.ets.org/toeic/test-takers/register.html" target="_blank" rel="noreferrer">
+            <strong>ETS 全球注册说明</strong>
+            <span>说明公开考试、机构考试和不同国家注册路径。</span>
+          </a>
+          <a class="official-link" href="https://www.ets.org/epn_directory.html" target="_blank" rel="noreferrer">
+            <strong>ETS EPN Directory</strong>
+            <span>用于查找各国本地 ETS Preferred Network 办公室。</span>
+          </a>
+          <a class="official-link" href="https://www.de.ets.org/toeic/resources/register.html" target="_blank" rel="noreferrer">
+            <strong>德国 ETS TOEIC</strong>
+            <span>德国地区 TOEIC 注册与考试信息入口。</span>
+          </a>
+          <a class="official-link" href="https://www.es.ets.org/toeic/test-takers/register.html" target="_blank" rel="noreferrer">
+            <strong>西班牙 ETS TOEIC</strong>
+            <span>西班牙语页面，说明 TOEIC 注册方式取决于考试类型和国家。</span>
+          </a>
+          <a class="official-link" href="https://www.iibc-global.org/english/toeic/test/lr/guide01.html" target="_blank" rel="noreferrer">
+            <strong>日本 IIBC</strong>
+            <span>日本 TOEIC L&R 申请、费用与付款方式说明。</span>
+          </a>
+          <a class="official-link" href="https://www.toeic.co.kr/" target="_blank" rel="noreferrer">
+            <strong>韩国 YBM</strong>
+            <span>韩国 TOEIC 官方考试接收、日程和成绩确认入口。</span>
+          </a>
+          <a class="official-link" href="https://www.toeic.com.hk/English/registration.html" target="_blank" rel="noreferrer">
+            <strong>香港/澳门 TOEIC</strong>
+            <span>香港与澳门报名方式、费用、成绩领取说明。</span>
+          </a>
+          <a class="official-link" href="https://www.toeic.com.tw/" target="_blank" rel="noreferrer">
+            <strong>台湾 TOEIC</strong>
+            <span>台湾区官方报名入口与公开测验信息。</span>
+          </a>
+          <a class="official-link" href="https://www.hopkins.ph/toeic/" target="_blank" rel="noreferrer">
+            <strong>菲律宾 Hopkins</strong>
+            <span>菲律宾 TOEIC 承办相关页面与注册入口。</span>
+          </a>
+        </div>
+      </section>
+
+      <section id="regions" aria-labelledby="regions-title">
+        <div class="section-head">
+          <h2 id="regions-title">海外地区信息库</h2>
+          <p>以下只保留已能追溯到官方或当地承办方页面的信息；具体开放场次、费用和出分时间仍需以当期官方页面为准。</p>
+        </div>
+
+        <div class="region-wrap" aria-label="地区信息表">
+          <table>
+            <thead>
+              <tr>
+                <th>地区</th>
+                <th>官方/承办方</th>
+                <th>报名方式</th>
+                <th>成绩/证书信息</th>
+                <th>来源</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>德国</strong></td>
+                <td>ETS Germany / 当地 EPN</td>
+                <td>ETS 德国页面说明注册方式取决于考试类型和所在国家；组织考试可联系本地 EPN。</td>
+                <td>公开考试成绩由本地 EPN 发给考生；机构考试成绩发给组织，通常不具全球可携带性。</td>
+                <td>
+                  <a class="source-link" href="https://www.de.ets.org/toeic/resources/register.html" target="_blank" rel="noreferrer">德国注册说明</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>西班牙</strong></td>
+                <td>ETS Spain / 当地 EPN</td>
+                <td>ETS 西班牙页面说明注册方式取决于考试类型和所在国家；个人需核对本地 EPN。</td>
+                <td>公开考试成绩可由考生使用；机构考试成绩通常只发给赞助组织。</td>
+                <td>
+                  <a class="source-link" href="https://www.es.ets.org/toeic/test-takers/register.html" target="_blank" rel="noreferrer">西班牙注册说明</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>日本</strong></td>
+                <td>IIBC / TOEIC Program Japan</td>
+                <td>需注册并登录 TOEIC Application Site 后线上申请 L&R Secure Program。</td>
+                <td>官方说明会显示 Digital Official Score Certificate；纸质证书是否需要会影响费用。</td>
+                <td>
+                  <a class="source-link" href="https://www.iibc-global.org/english/toeic/test/lr/guide01.html" target="_blank" rel="noreferrer">IIBC 申请与费用</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>韩国</strong></td>
+                <td>YBM / 韩国 TOEIC 委员会</td>
+                <td>YBM 官方站提供考试接收、考试日程和成绩确认入口。</td>
+                <td>FAQ 显示成绩通常考试后一周 15:00 发布，但可能随日程变化。</td>
+                <td>
+                  <a class="source-link" href="https://www.toeic.co.kr/" target="_blank" rel="noreferrer">YBM 官方站</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>香港</strong></td>
+                <td>Smart Education Co. Ltd. / TOEIC Hong Kong</td>
+                <td>可下载报名表，官方页说明可现场、邮寄、邮件或传真提交。</td>
+                <td>页面列明 L&R 费用、成绩报告/证书领取与快递费用。</td>
+                <td>
+                  <a class="source-link" href="https://www.toeic.com.hk/English/registration.html" target="_blank" rel="noreferrer">香港报名详情</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>澳门</strong></td>
+                <td>TOEIC Hong Kong 页面列出澳门报名安排</td>
+                <td>可下载报名表，并在指定澳门院校提交和现场支付。</td>
+                <td>页面列明 L&R 费用、成绩报告/证书领取与快递费用。</td>
+                <td>
+                  <a class="source-link" href="https://www.toeic.com.hk/English/registration.html" target="_blank" rel="noreferrer">澳门报名详情</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>台湾</strong></td>
+                <td>TOEIC 台湾区官方网站</td>
+                <td>官方站提供报名入口；官方报名表包含公开测验场次、个人资料与联络资料字段。</td>
+                <td>具体场次和报名要求需以台湾官方站当期页面为准。</td>
+                <td>
+                  <a class="source-link" href="https://www.toeic.com.tw/" target="_blank" rel="noreferrer">台湾官方站</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>菲律宾</strong></td>
+                <td>Hopkins International Partners</td>
+                <td>Hopkins 页面标注其为菲律宾 TOEIC 独家经销/承办相关机构，并提供注册入口。</td>
+                <td>具体考试中心、日期、费用和成绩安排需以 Hopkins 当期页面为准。</td>
+                <td>
+                  <a class="source-link" href="https://www.hopkins.ph/toeic/" target="_blank" rel="noreferrer">Hopkins TOEIC</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>其他国家</strong></td>
+                <td>ETS Preferred Network / 当地承办方</td>
+                <td>ETS 明确说明美国/加拿大以外需联系当地 EPN 办公室确认日期和可用性。</td>
+                <td>不同国家差异较大，不在本站直接下结论。</td>
+                <td>
+                  <a class="source-link" href="https://www.ets.org/toeic/test-takers/register.html" target="_blank" rel="noreferrer">ETS 注册说明</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="region-cards" aria-label="移动端地区信息">
+          <article class="region-card">
+            <h3>德国</h3>
+            <dl>
+              <div><dt>官方/承办方</dt><dd>ETS Germany / 当地 EPN</dd></div>
+              <div><dt>成绩说明</dt><dd>公开考试成绩由本地 EPN 发给考生；机构考试成绩通常不具全球可携带性。</dd></div>
+              <div><dt>来源</dt><dd><a class="source-link" href="https://www.de.ets.org/toeic/resources/register.html" target="_blank" rel="noreferrer">德国注册说明</a></dd></div>
+            </dl>
+          </article>
+          <article class="region-card">
+            <h3>西班牙</h3>
+            <dl>
+              <div><dt>官方/承办方</dt><dd>ETS Spain / 当地 EPN</dd></div>
+              <div><dt>报名说明</dt><dd>注册方式取决于考试类型和所在国家，个人需核对本地 EPN。</dd></div>
+              <div><dt>来源</dt><dd><a class="source-link" href="https://www.es.ets.org/toeic/test-takers/register.html" target="_blank" rel="noreferrer">西班牙注册说明</a></dd></div>
+            </dl>
+          </article>
+          <article class="region-card">
+            <h3>日本</h3>
+            <dl>
+              <div><dt>官方/承办方</dt><dd>IIBC / TOEIC Program Japan</dd></div>
+              <div><dt>报名方式</dt><dd>注册并登录 TOEIC Application Site 后线上申请 L&R Secure Program。</dd></div>
+              <div><dt>来源</dt><dd><a class="source-link" href="https://www.iibc-global.org/english/toeic/test/lr/guide01.html" target="_blank" rel="noreferrer">IIBC 申请与费用</a></dd></div>
+            </dl>
+          </article>
+          <article class="region-card">
+            <h3>韩国</h3>
+            <dl>
+              <div><dt>官方/承办方</dt><dd>YBM / 韩国 TOEIC 委员会</dd></div>
+              <div><dt>成绩信息</dt><dd>FAQ 显示成绩通常考试后一周 15:00 发布，但可能随日程变化。</dd></div>
+              <div><dt>来源</dt><dd><a class="source-link" href="https://www.toeic.co.kr/" target="_blank" rel="noreferrer">YBM 官方站</a></dd></div>
+            </dl>
+          </article>
+          <article class="region-card">
+            <h3>香港</h3>
+            <dl>
+              <div><dt>官方/承办方</dt><dd>Smart Education Co. Ltd. / TOEIC Hong Kong</dd></div>
+              <div><dt>报名方式</dt><dd>可现场、邮寄、邮件或传真提交报名表。</dd></div>
+              <div><dt>来源</dt><dd><a class="source-link" href="https://www.toeic.com.hk/English/registration.html" target="_blank" rel="noreferrer">香港报名详情</a></dd></div>
+            </dl>
+          </article>
+          <article class="region-card">
+            <h3>澳门</h3>
+            <dl>
+              <div><dt>官方/承办方</dt><dd>TOEIC Hong Kong 页面列出澳门报名安排</dd></div>
+              <div><dt>报名方式</dt><dd>可下载报名表，并在指定澳门院校提交和现场支付。</dd></div>
+              <div><dt>来源</dt><dd><a class="source-link" href="https://www.toeic.com.hk/English/registration.html" target="_blank" rel="noreferrer">澳门报名详情</a></dd></div>
+            </dl>
+          </article>
+          <article class="region-card">
+            <h3>台湾</h3>
+            <dl>
+              <div><dt>官方/承办方</dt><dd>TOEIC 台湾区官方网站</dd></div>
+              <div><dt>报名信息</dt><dd>官方站提供报名入口；具体场次以当期页面为准。</dd></div>
+              <div><dt>来源</dt><dd><a class="source-link" href="https://www.toeic.com.tw/" target="_blank" rel="noreferrer">台湾官方站</a></dd></div>
+            </dl>
+          </article>
+          <article class="region-card">
+            <h3>菲律宾</h3>
+            <dl>
+              <div><dt>官方/承办方</dt><dd>Hopkins International Partners</dd></div>
+              <div><dt>报名信息</dt><dd>Hopkins 提供 TOEIC 页面与注册入口，具体日期和费用以当期页面为准。</dd></div>
+              <div><dt>来源</dt><dd><a class="source-link" href="https://www.hopkins.ph/toeic/" target="_blank" rel="noreferrer">Hopkins TOEIC</a></dd></div>
+            </dl>
+          </article>
+          <article class="region-card">
+            <h3>其他国家</h3>
+            <dl>
+              <div><dt>官方路径</dt><dd>ETS Preferred Network / 当地承办方</dd></div>
+              <div><dt>报名信息</dt><dd>ETS 说明美国/加拿大以外需联系当地 EPN 办公室确认日期和可用性。</dd></div>
+              <div><dt>来源</dt><dd><a class="source-link" href="https://www.ets.org/toeic/test-takers/register.html" target="_blank" rel="noreferrer">ETS 注册说明</a></dd></div>
+            </dl>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="process-title">
+        <div class="section-head">
+          <h2 id="process-title">咨询流程</h2>
+          <p>先收集最少必要信息，再判断是否值得进入深度沟通。</p>
+        </div>
+
+        <div class="steps">
+          <article class="step">
+            <h3>提交需求</h3>
+            <p>填写目标分数、当前基础、最晚提交时间、用途和联系方式。</p>
+          </article>
+          <article class="step">
+            <h3>确认路径</h3>
+            <p>顾问根据地区、时间窗口和提交要求，判断可选报名路径。</p>
+          </article>
+          <article class="step">
+            <h3>匹配方案</h3>
+            <p>根据目标分数、当前基础和时间限制，沟通后续可执行方案。</p>
+          </article>
+          <article class="step">
+            <h3>顾问沟通</h3>
+            <p>通过微信或手机号继续确认细节。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="faq" aria-labelledby="faq-title">
+        <div class="section-head">
+          <h2 id="faq-title">常见问题</h2>
+          <p>先处理用户最容易卡住的问题，减少无效沟通。</p>
+        </div>
+
+        <div class="faq">
+          <details open>
+            <summary>托业 L&R、S&W、IP 有什么区别？</summary>
+            <p>
+              L&R 常用于听力与阅读能力证明；S&W 覆盖口语与写作；IP 通常是机构或团体组织的考试。提交前需要确认接收方认可哪一种成绩。
+            </p>
+          </details>
+          <details>
+            <summary>个人能不能报名日本托业？</summary>
+            <p>
+              日本公开考试通常支持个人申请，但 IP 或团体考试多由机构组织。两者用途和成绩形式可能不同，需要按提交场景核对。
+            </p>
+          </details>
+          <details>
+            <summary>成绩多久能出来？</summary>
+            <p>
+              不同地区、考试类型和证书形式存在差异。建议先倒排提交时间，再选择地区和考试形式。
+            </p>
+          </details>
+          <details>
+            <summary>没有当前成绩可以咨询吗？</summary>
+            <p>
+              可以。表单中选择“暂无成绩”或“不确定”，顾问会先根据目标分数、用途和提交时间判断沟通方向。
+            </p>
+          </details>
+        </div>
+      </section>
+
+      <section class="final-cta" aria-labelledby="final-title">
+        <div>
+          <h2 id="final-title">先确认路径，再决定怎么安排。</h2>
+          <p>如果你已经有目标分数和提交时间，直接提交需求会更高效。</p>
+        </div>
+        <a class="button" href="#consult">提交托业需求</a>
+      </section>
+    </main>
+
+    <footer>
+      <main>
+        托业成绩助手 · 当前主要支持托业提分、海外报名与成绩提交方案咨询。
+      </main>
+    </footer>
+
+    <script>
+      const form = document.querySelector("#leadForm");
+      const result = document.querySelector("#formResult");
+      const successPanel = document.querySelector("#successPanel");
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const data = Object.fromEntries(new FormData(form).entries());
+
+        try {
+          const response = await fetch("/api/leads", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+
+          if (!response.ok) {
+            throw new Error("提交失败");
+          }
+
+          form.reset();
+          result.style.display = "none";
+          successPanel.style.display = "block";
+        } catch (error) {
+          successPanel.style.display = "none";
+          result.textContent =
+            "提交暂未成功，请刷新页面后重试，或直接扫码添加微信咨询。";
+          result.style.display = "block";
+        }
+      });
+    </script>
+  </body>
+</html>

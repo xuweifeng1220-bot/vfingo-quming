@@ -1,0 +1,15 @@
+{
+  "name": "toeic-score-helper",
+  "version": "1.0.0",
+  "private": true,
+  "description": "托业成绩助手：托业提分、海外报名与成绩提交方案咨询 MVP",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check scripts/init-feishu.js",
+    "feishu:init": "node scripts/init-feishu.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
