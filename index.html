@@ -33,6 +33,7 @@
         --line-strong: #bdcbc7;
         --accent: #0b5f55;
         --accent-dark: #073f39;
+        --accent-bright: #17a796;
         --accent-soft: #dcece8;
         --warn-soft: #f6f0e4;
         --radius: 12px;
@@ -48,8 +49,11 @@
       }
 
       body {
+        position: relative;
         margin: 0;
         background:
+          radial-gradient(circle at 82% 8%, rgba(23, 167, 150, 0.16), transparent 26rem),
+          radial-gradient(circle at 10% 26%, rgba(11, 95, 85, 0.1), transparent 20rem),
           linear-gradient(180deg, rgba(11, 95, 85, 0.08), transparent 360px),
           var(--bg);
         color: var(--ink);
@@ -57,6 +61,19 @@
           -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
           "Microsoft YaHei", sans-serif;
         line-height: 1.62;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(11, 95, 85, 0.055) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(11, 95, 85, 0.045) 1px, transparent 1px);
+        background-size: 42px 42px;
+        mask-image: linear-gradient(180deg, #000 0%, transparent 78%);
       }
 
       a {
@@ -116,6 +133,8 @@
 
       .button {
         appearance: none;
+        position: relative;
+        overflow: hidden;
         border: 0;
         border-radius: 10px;
         background: var(--accent);
@@ -135,13 +154,32 @@
           transform 0.18s ease;
       }
 
+      .button::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-120%);
+        background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+        transition: transform 0.45s ease;
+      }
+
       .button:hover {
         background: var(--accent-dark);
         transform: translateY(-1px);
       }
 
+      .button:hover::after {
+        transform: translateX(120%);
+      }
+
       .button:active {
         transform: translateY(1px);
+      }
+
+      .button[disabled] {
+        cursor: wait;
+        opacity: 0.78;
+        transform: none;
       }
 
       .button.secondary {
@@ -163,6 +201,7 @@
       }
 
       .eyebrow {
+        position: relative;
         color: var(--accent-dark);
         display: inline-flex;
         width: fit-content;
@@ -172,6 +211,16 @@
         padding: 6px 11px;
         font-size: 13px;
         font-weight: 800;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        margin: auto 0;
+        border-radius: 50%;
+        background: var(--accent-bright);
+        box-shadow: 0 0 0 5px rgba(23, 167, 150, 0.12);
       }
 
       h1,
@@ -215,8 +264,17 @@
       }
 
       .proof-item {
+        position: relative;
         background: rgba(255, 255, 255, 0.72);
         padding: 16px;
+        transition:
+          background 0.2s ease,
+          transform 0.2s ease;
+      }
+
+      .proof-item:hover {
+        background: #fff;
+        transform: translateY(-2px);
       }
 
       .proof-item strong {
@@ -232,6 +290,7 @@
       }
 
       .hero-image {
+        position: relative;
         max-width: 720px;
         margin-top: 28px;
         overflow: hidden;
@@ -240,21 +299,49 @@
         background: #dce6e3;
       }
 
+      .hero-image::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background:
+          linear-gradient(90deg, rgba(11, 95, 85, 0.18), transparent 22%, transparent 78%, rgba(11, 95, 85, 0.18)),
+          repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.14) 0, rgba(255, 255, 255, 0.14) 1px, transparent 1px, transparent 7px);
+        mix-blend-mode: screen;
+        opacity: 0.42;
+      }
+
       .hero-image img {
         display: block;
         width: 100%;
         aspect-ratio: 16 / 7;
         object-fit: cover;
+        transform: scale(1.01);
+        transition: transform 0.7s ease;
+      }
+
+      .hero-image:hover img {
+        transform: scale(1.045);
       }
 
       .form-card {
         position: sticky;
         top: 88px;
+        overflow: hidden;
         border: 1px solid var(--line-strong);
         border-radius: var(--radius);
         background: rgba(255, 255, 255, 0.94);
         box-shadow: var(--shadow);
         padding: 24px;
+      }
+
+      .form-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-bright), var(--accent));
       }
 
       .form-card h2 {
@@ -291,6 +378,10 @@
         font: inherit;
         font-size: 15px;
         padding: 12px 13px;
+        transition:
+          border-color 0.18s ease,
+          box-shadow 0.18s ease,
+          transform 0.18s ease;
       }
 
       textarea {
@@ -308,6 +399,7 @@
       textarea:focus {
         border-color: var(--accent);
         outline: 3px solid rgba(11, 95, 85, 0.17);
+        box-shadow: 0 10px 24px rgba(11, 95, 85, 0.09);
       }
 
       .form-card .button {
@@ -339,6 +431,10 @@
         border-radius: var(--radius);
         background: var(--accent-soft);
         padding: 16px;
+      }
+
+      .success-panel.is-visible {
+        animation: panelIn 0.35s ease both;
       }
 
       .success-panel h3 {
@@ -424,10 +520,18 @@
         gap: 20px;
         padding: 22px;
         border-bottom: 1px solid var(--line);
+        transition:
+          background 0.18s ease,
+          transform 0.18s ease;
       }
 
       .audience-row:last-child {
         border-bottom: 0;
+      }
+
+      .audience-row:hover {
+        background: rgba(220, 236, 232, 0.38);
+        transform: translateX(4px);
       }
 
       .audience-row strong {
@@ -440,10 +544,24 @@
       }
 
       .calm-panel {
+        position: relative;
+        overflow: hidden;
         padding: 24px;
         background:
           linear-gradient(145deg, rgba(11, 95, 85, 0.08), transparent 56%),
           #fff;
+      }
+
+      .calm-panel::after {
+        content: "";
+        position: absolute;
+        right: -42px;
+        bottom: -42px;
+        width: 140px;
+        height: 140px;
+        border: 1px solid rgba(11, 95, 85, 0.16);
+        border-radius: 50%;
+        box-shadow: inset 0 0 0 22px rgba(11, 95, 85, 0.035);
       }
 
       .calm-panel h3 {
@@ -478,10 +596,22 @@
       }
 
       .service-note {
+        position: relative;
+        overflow: hidden;
         border-radius: var(--radius);
         background: var(--accent-dark);
         color: #fff;
         padding: 28px;
+      }
+
+      .service-note::after {
+        content: "";
+        position: absolute;
+        inset: auto -32px -32px auto;
+        width: 170px;
+        height: 170px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(23, 167, 150, 0.42), transparent 65%);
       }
 
       .service-note h3 {
@@ -506,6 +636,14 @@
       .service-item {
         background: var(--surface);
         padding: 22px;
+        transition:
+          background 0.18s ease,
+          transform 0.18s ease;
+      }
+
+      .service-item:hover {
+        background: #fbfefd;
+        transform: translateY(-2px);
       }
 
       .service-item strong {
@@ -530,6 +668,16 @@
         border-radius: var(--radius);
         background: var(--surface);
         padding: 22px;
+        transition:
+          border-color 0.18s ease,
+          box-shadow 0.18s ease,
+          transform 0.18s ease;
+      }
+
+      .pathway article:hover,
+      details:hover,
+      .official-link:hover {
+        box-shadow: 0 16px 38px rgba(18, 39, 36, 0.08);
       }
 
       .pathway h3 {
@@ -579,6 +727,7 @@
         text-decoration: none;
         transition:
           border-color 0.18s ease,
+          box-shadow 0.18s ease,
           transform 0.18s ease;
       }
 
@@ -719,6 +868,14 @@
         border-radius: var(--radius);
         background: var(--surface);
         padding: 17px 18px;
+        transition:
+          border-color 0.18s ease,
+          box-shadow 0.18s ease,
+          transform 0.18s ease;
+      }
+
+      details:hover {
+        transform: translateY(-1px);
       }
 
       summary {
@@ -766,6 +923,50 @@
         font-size: 13px;
       }
 
+      .reveal {
+        opacity: 0;
+        transform: translateY(22px);
+      }
+
+      .reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+        transition:
+          opacity 0.55s ease,
+          transform 0.55s ease;
+      }
+
+      .hero-copy,
+      .form-card {
+        animation: heroIn 0.62s ease both;
+      }
+
+      .form-card {
+        animation-delay: 0.08s;
+      }
+
+      @keyframes heroIn {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes panelIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         html {
           scroll-behavior: auto;
@@ -775,6 +976,12 @@
         *::before,
         *::after {
           transition: none !important;
+          animation: none !important;
+        }
+
+        .reveal {
+          opacity: 1;
+          transform: none;
         }
       }
 
@@ -1030,7 +1237,7 @@
         </aside>
       </section>
 
-      <section aria-labelledby="audience-title">
+      <section class="reveal" aria-labelledby="audience-title">
         <div class="section-head">
           <h2 id="audience-title">适合有明确提交压力的人</h2>
           <p>这不是泛泛的英语学习咨询。页面服务的是已经被时间、分数或提交要求卡住的人。</p>
@@ -1064,7 +1271,7 @@
         </div>
       </section>
 
-      <section id="service" aria-labelledby="service-title">
+      <section class="reveal" id="service" aria-labelledby="service-title">
         <div class="section-head">
           <h2 id="service-title">我们帮你确认什么</h2>
           <p>围绕目标分数、当前基础和提交时间，先把选择范围缩小到可执行方案。</p>
@@ -1097,7 +1304,7 @@
         </div>
       </section>
 
-      <section aria-labelledby="pathway-title">
+      <section class="reveal" aria-labelledby="pathway-title">
         <div class="section-head">
           <h2 id="pathway-title">一次有效沟通需要三类信息</h2>
           <p>表单只收必要信息，避免一开始就让你填写大量无关内容。</p>
@@ -1119,7 +1326,7 @@
         </div>
       </section>
 
-      <section id="official-sites" aria-labelledby="official-sites-title">
+      <section class="reveal" id="official-sites" aria-labelledby="official-sites-title">
         <div class="section-head">
           <h2 id="official-sites-title">官方入口导航</h2>
           <p>以下链接用于核对报名、成绩、EPN 和地区承办信息。本站做信息整理与咨询，不替代官方页面。</p>
@@ -1160,7 +1367,7 @@
         </div>
       </section>
 
-      <section id="regions" aria-labelledby="regions-title">
+      <section class="reveal" id="regions" aria-labelledby="regions-title">
         <div class="section-head">
           <h2 id="regions-title">海外地区信息库</h2>
           <p>以下只保留可追溯到官方或当地承办方页面的信息。具体场次、费用和出分时间仍需以当期官方页面为准。</p>
@@ -1339,7 +1546,7 @@
         </div>
       </section>
 
-      <section aria-labelledby="process-title">
+      <section class="reveal" aria-labelledby="process-title">
         <div class="section-head">
           <h2 id="process-title">咨询流程</h2>
           <p>先收集最少必要信息，再判断是否值得进入深度沟通。</p>
@@ -1365,7 +1572,7 @@
         </div>
       </section>
 
-      <section id="faq" aria-labelledby="faq-title">
+      <section class="reveal" id="faq" aria-labelledby="faq-title">
         <div class="section-head">
           <h2 id="faq-title">常见问题</h2>
           <p>先处理最容易卡住的问题，减少无效沟通。</p>
@@ -1399,7 +1606,7 @@
         </div>
       </section>
 
-      <section class="final-cta" aria-labelledby="final-title">
+      <section class="final-cta reveal" aria-labelledby="final-title">
         <div>
           <h2 id="final-title">如果已经有提交日期，先把时间窗口算清楚。</h2>
           <p>目标分数、当前基础和最晚提交时间，是判断方案的起点。</p>
@@ -1418,10 +1625,33 @@
       const form = document.querySelector("#leadForm");
       const result = document.querySelector("#formResult");
       const successPanel = document.querySelector("#successPanel");
+      const submitButton = form.querySelector('button[type="submit"]');
+
+      const revealItems = document.querySelectorAll(".reveal");
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduceMotion) {
+        revealItems.forEach((item) => item.classList.add("is-visible"));
+      } else {
+        const revealObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                revealObserver.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.16 },
+        );
+        revealItems.forEach((item) => revealObserver.observe(item));
+      }
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const data = Object.fromEntries(new FormData(form).entries());
+        const originalText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.textContent = "正在提交";
 
         try {
           const response = await fetch("/api/leads", {
@@ -1437,6 +1667,7 @@
           form.reset();
           result.style.display = "none";
           successPanel.style.display = "block";
+          successPanel.classList.add("is-visible");
           if (window._hmt) {
             window._hmt.push(["_trackEvent", "lead", "submit", "toeic_form"]);
           }
@@ -1445,6 +1676,9 @@
           result.textContent =
             "提交暂未成功，请刷新页面后重试，或直接扫码添加微信咨询。";
           result.style.display = "block";
+        } finally {
+          submitButton.disabled = false;
+          submitButton.textContent = originalText;
         }
       });
     </script>
