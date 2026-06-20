@@ -1,0 +1,3911 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>取名决策雷达</title>
+    <meta
+      name="description"
+      content="中文新生儿取名决策工具：结合出生信息、重名风险、家长偏好、音律字形和官方同名查询引导。"
+    />
+    <style>
+      :root {
+        --bg: #f5f7f6;
+        --surface: #ffffff;
+        --surface-soft: #edf3f1;
+        --ink: #13201e;
+        --muted: #52615e;
+        --subtle: #6f7d79;
+        --line: #d8e3df;
+        --line-strong: #b9c9c4;
+        --accent: #0a6258;
+        --accent-dark: #073f39;
+        --accent-soft: #dcece8;
+        --blue: #305d7f;
+        --blue-soft: #e4edf3;
+        --gold: #88631b;
+        --gold-soft: #f5ecd8;
+        --red: #9a332d;
+        --red-soft: #f6e4e1;
+        --green: #267052;
+        --green-soft: #e1f0e8;
+        --radius: 12px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(180deg, rgba(10, 98, 88, 0.08), transparent 340px),
+          var(--bg);
+        color: var(--ink);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Microsoft YaHei", sans-serif;
+        line-height: 1.58;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .shell {
+        width: min(1280px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid rgba(216, 227, 223, 0.9);
+        background: rgba(245, 247, 246, 0.92);
+        backdrop-filter: blur(14px);
+      }
+
+      .nav {
+        min-height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 900;
+      }
+
+      .mark {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .nav span:last-child {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .hero {
+        padding: 46px 0 28px;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 390px;
+        gap: 32px;
+        align-items: end;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        max-width: 780px;
+        font-size: 56px;
+        line-height: 1.08;
+        letter-spacing: 0;
+        text-wrap: balance;
+      }
+
+      .lead {
+        max-width: 760px;
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 18px;
+      }
+
+      .notice {
+        display: grid;
+        gap: 8px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 18px;
+      }
+
+      .notice strong {
+        color: var(--accent-dark);
+      }
+
+      .notice span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .ritual {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--line);
+        margin-bottom: 18px;
+      }
+
+      .ritual-step {
+        background: var(--surface);
+        padding: 16px;
+      }
+
+      .ritual-step span {
+        color: var(--accent-dark);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .ritual-step strong {
+        display: block;
+        margin-top: 5px;
+        font-size: 16px;
+      }
+
+      .ritual-step p {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: 410px minmax(0, 1fr);
+        gap: 20px;
+        align-items: start;
+        padding: 18px 0 56px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+      }
+
+      .input-panel {
+        position: sticky;
+        top: 84px;
+        max-height: calc(100vh - 104px);
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        overflow: hidden;
+      }
+
+      .panel-head {
+        padding: 20px 20px 16px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .panel-head h2 {
+        font-size: 22px;
+      }
+
+      .panel-head p {
+        margin-top: 7px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .form-body {
+        display: grid;
+        gap: 16px;
+        overflow-y: auto;
+        padding: 20px;
+        scrollbar-gutter: stable;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      label {
+        display: grid;
+        gap: 7px;
+        color: #263734;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line-strong);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--ink);
+        padding: 11px 12px;
+      }
+
+      textarea {
+        min-height: 74px;
+        resize: vertical;
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: #6c7b77;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus,
+      button:focus-visible {
+        border-color: var(--accent);
+        outline: 3px solid rgba(10, 98, 88, 0.18);
+      }
+
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .chip {
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        background: #fff;
+        color: var(--ink);
+        padding: 8px 11px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .chip[aria-pressed="true"] {
+        border-color: rgba(10, 98, 88, 0.3);
+        background: var(--accent-soft);
+        color: var(--accent-dark);
+      }
+
+      .chip-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .chip-tools span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .primary {
+        min-height: 48px;
+        border: 0;
+        border-radius: 10px;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 900;
+        transition:
+          background 0.18s ease,
+          transform 0.18s ease;
+      }
+
+      .form-cta {
+        border-top: 1px solid var(--line);
+        background: rgba(251, 252, 251, 0.92);
+        padding: 14px 18px 16px;
+      }
+
+      .primary:hover {
+        background: var(--accent-dark);
+        transform: translateY(-1px);
+      }
+
+      .secondary {
+        min-height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--line-strong);
+        border-radius: 9px;
+        background: #fff;
+        color: var(--accent-dark);
+        font-weight: 800;
+        padding: 8px 11px;
+        text-decoration: none;
+      }
+
+      .output {
+        display: grid;
+        gap: 18px;
+      }
+
+      .strategy {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--line);
+      }
+
+      .strategy-item {
+        background: var(--surface);
+        padding: 18px;
+      }
+
+      .strategy-item span {
+        display: block;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .strategy-item strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 20px;
+      }
+
+      .summary {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 20px;
+      }
+
+      .summary h2 {
+        font-size: 22px;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .score-tile {
+        border-radius: 10px;
+        background: var(--surface-soft);
+        padding: 12px;
+      }
+
+      .score-tile span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .score-tile strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 24px;
+      }
+
+      .result-list {
+        display: grid;
+        gap: 18px;
+      }
+
+      .people-panel {
+        display: grid;
+        gap: 14px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 20px;
+      }
+
+      .people-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .people-head h2 {
+        font-size: 22px;
+      }
+
+      .people-head p {
+        margin-top: 7px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .people-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+      }
+
+      .person-card {
+        display: grid;
+        gap: 9px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background: var(--surface-soft);
+        padding: 14px;
+        text-align: left;
+        transition:
+          border-color 0.18s ease,
+          background 0.18s ease,
+          transform 0.18s ease;
+      }
+
+      .person-title {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .person-check {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 auto;
+        margin-top: 3px;
+        border: 1px solid var(--line-strong);
+        border-radius: 5px;
+        background: #fff;
+        color: transparent;
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .person-card[aria-pressed="true"] .person-check {
+        border-color: var(--seal);
+        background: var(--seal);
+        color: #fff;
+      }
+
+      .person-card[aria-pressed="true"] {
+        border-color: rgba(10, 98, 88, 0.5);
+        background: var(--accent-soft);
+      }
+
+      .person-card:hover {
+        transform: translateY(-1px);
+      }
+
+      .person-card h3 {
+        font-size: 18px;
+      }
+
+      .person-meta {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .person-card p {
+        color: #364844;
+        font-size: 14px;
+      }
+
+      .person-keywords {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+
+      .person-keywords span {
+        border-radius: 999px;
+        background: #fff;
+        color: var(--accent-dark);
+        padding: 5px 8px;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .selected-people {
+        color: var(--accent-dark);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .result-group {
+        display: grid;
+        gap: 12px;
+      }
+
+      .result-group h3 {
+        font-size: 18px;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 14px;
+      }
+
+      .name-card {
+        display: grid;
+        gap: 14px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 18px;
+      }
+
+      .name-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .name-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .name-text {
+        font-size: 32px;
+        font-weight: 900;
+        line-height: 1.1;
+      }
+
+      .score {
+        min-width: 62px;
+        text-align: right;
+      }
+
+      .score {
+        position: relative;
+      }
+
+      .score strong {
+        display: block;
+        font-size: 28px;
+        line-height: 1;
+      }
+
+      .score span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .score-trigger {
+        min-width: 64px;
+        border: 0;
+        border-radius: 10px;
+        background: rgba(216, 242, 237, 0.78);
+        color: var(--accent-dark);
+        padding: 7px 8px;
+        text-align: right;
+      }
+
+      .score-trigger strong {
+        display: block;
+        color: var(--seal);
+        font-size: 28px;
+        line-height: 1;
+      }
+
+      .score-trigger span {
+        display: block;
+      }
+
+      .name-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 9px;
+      }
+
+      .name-tag {
+        border-radius: 999px;
+        background: var(--surface-soft);
+        color: #30423e;
+        padding: 5px 9px;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .name-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .icon-button {
+        width: 34px;
+        height: 34px;
+        display: inline-grid;
+        place-items: center;
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        background: #fff;
+        color: var(--accent-dark);
+        font-size: 17px;
+        font-weight: 900;
+      }
+
+      .icon-button[aria-disabled="true"] {
+        color: rgba(82, 100, 95, 0.56);
+        border-color: rgba(174, 191, 182, 0.44);
+        background: rgba(238, 244, 239, 0.7);
+      }
+
+      .reason-list {
+        display: grid;
+        gap: 7px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .meter {
+        display: grid;
+        gap: 8px;
+      }
+
+      .meter-row {
+        display: grid;
+        grid-template-columns: 76px minmax(0, 1fr) 34px;
+        gap: 8px;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .bar {
+        height: 7px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #e8eeec;
+      }
+
+      .bar span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--accent);
+      }
+
+      .score-panel {
+        position: fixed;
+        z-index: 40;
+        width: min(392px, calc(100vw - 32px));
+        display: grid;
+        gap: 12px;
+        border: 1px solid rgba(21, 35, 31, 0.12);
+        border-radius: 14px;
+        background: #fff;
+        padding: 14px;
+        box-shadow: 0 6px 8px rgba(16, 43, 53, 0.1);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(6px) scale(0.98);
+        transform-origin: top right;
+        transition:
+          opacity 170ms var(--ease-out),
+          transform 170ms var(--ease-out);
+      }
+
+      .score-panel[aria-hidden="true"] {
+        visibility: hidden;
+      }
+
+      .score-panel.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0) scale(1);
+      }
+
+      .score-panel-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .score-panel-title strong {
+        color: var(--rose);
+        font-size: 17px;
+      }
+
+      .score-panel-title span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .score-panel-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+      }
+
+      .score-panel-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        min-height: 50px;
+        border: 1px solid rgba(21, 35, 31, 0.1);
+        border-radius: 11px;
+        background: rgba(232, 239, 235, 0.62);
+        padding: 10px 12px;
+        color: #334640;
+        font-weight: 900;
+      }
+
+      .score-panel-item::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        flex: 0 0 auto;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--fresh), var(--sun), var(--rose));
+      }
+
+      .score-panel-item span {
+        margin-right: auto;
+      }
+
+      .score-panel-item strong {
+        color: #40524d;
+        font-size: 18px;
+      }
+
+      .official-guide {
+        display: grid;
+        gap: 14px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--blue-soft);
+        padding: 18px;
+      }
+
+      .guide-steps {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .guide-step {
+        display: grid;
+        gap: 6px;
+        border-radius: 10px;
+        background: #fff;
+        padding: 12px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .guide-step strong {
+        color: var(--ink);
+      }
+
+      .support-module {
+        display: grid;
+        gap: 16px;
+        border: 1px solid rgba(21, 35, 31, 0.12);
+        border-radius: 16px;
+        background: rgba(251, 252, 251, 0.82);
+        padding: 18px;
+      }
+
+      .support-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .support-head p {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .toast {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 30;
+        max-width: min(360px, calc(100vw - 32px));
+        border: 1px solid rgba(21, 95, 82, 0.18);
+        border-radius: 12px;
+        background: var(--accent-dark);
+        color: #fff;
+        padding: 12px 14px;
+        font-size: 14px;
+        font-weight: 800;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(10px) scale(0.98);
+        transition:
+          opacity 180ms var(--ease-out),
+          transform 180ms var(--ease-out);
+      }
+
+      .toast.is-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+      .empty {
+        border: 1px dashed var(--line-strong);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.62);
+        padding: 28px;
+        color: var(--muted);
+      }
+
+      .example-preview {
+        display: grid;
+        gap: 14px;
+      }
+
+      .example-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .example-head h3 {
+        font-size: 20px;
+      }
+
+      .example-head p {
+        max-width: 58ch;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .example-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .example-card {
+        display: grid;
+        gap: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 16px;
+      }
+
+      .example-label {
+        width: fit-content;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent-dark);
+        padding: 4px 9px;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .example-name {
+        color: var(--accent-dark);
+        font-family: "Kaiti SC", "STKaiti", "KaiTi", "PingFang SC", serif;
+        font-size: 30px;
+        font-weight: 800;
+        line-height: 1.1;
+      }
+
+      .example-card ul {
+        display: grid;
+        gap: 7px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .example-card li strong {
+        color: var(--ink);
+      }
+
+      .source-note {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 18px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .source-note strong {
+        color: var(--ink);
+      }
+
+      /* Visual redesign layer: modern product UI with restrained Chinese naming aesthetics. */
+      :root {
+        --bg: #eef1ec;
+        --surface: #fbfcf8;
+        --surface-soft: #eef4ef;
+        --ink: #17211d;
+        --muted: #52645f;
+        --subtle: #72817c;
+        --line: #cbd8d0;
+        --line-strong: #aebfb6;
+        --accent: #155c4f;
+        --accent-dark: #0b312b;
+        --accent-soft: #dcebe2;
+        --blue: #365d58;
+        --blue-soft: #e6efec;
+        --gold: #735d2b;
+        --gold-soft: #f1ead8;
+        --red: #8f3d33;
+        --red-soft: #f1e3df;
+        --green: #1f6b56;
+        --green-soft: #e1efe8;
+        --radius: 14px;
+        --seal: #a64232;
+        --paper: #f7f8f2;
+        --shadow-soft: none;
+      }
+
+      body {
+        background:
+          linear-gradient(90deg, rgba(21, 92, 79, 0.055) 1px, transparent 1px),
+          linear-gradient(180deg, rgba(166, 66, 50, 0.045), transparent 360px),
+          var(--bg);
+        background-size: 36px 36px, auto, auto;
+      }
+
+      .shell {
+        width: min(1320px, calc(100% - 48px));
+      }
+
+      .topbar {
+        border-bottom: 1px solid rgba(174, 191, 182, 0.58);
+        background: rgba(238, 241, 236, 0.84);
+        backdrop-filter: blur(18px);
+      }
+
+      .brand {
+        letter-spacing: 0.01em;
+      }
+
+      .mark {
+        border-radius: 8px;
+        background: var(--seal);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+        font-family: "Kaiti SC", "STKaiti", "KaiTi", serif;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        margin-top: 24px;
+        padding: 40px;
+        border: 1px solid rgba(11, 49, 43, 0.18);
+        border-radius: 16px;
+        background:
+          linear-gradient(135deg, rgba(11, 49, 43, 0.98), rgba(21, 92, 79, 0.92) 58%, rgba(247, 248, 242, 0.94) 58%),
+          var(--accent-dark);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        right: 34px;
+        bottom: 28px;
+        width: 78px;
+        height: 78px;
+        display: grid;
+        place-items: center;
+        border: 2px solid rgba(166, 66, 50, 0.8);
+        background:
+          radial-gradient(circle at 50% 50%, rgba(166, 66, 50, 0.56) 0 5px, transparent 6px),
+          linear-gradient(90deg, transparent 46%, rgba(166, 66, 50, 0.22) 47% 53%, transparent 54%),
+          linear-gradient(0deg, transparent 46%, rgba(166, 66, 50, 0.22) 47% 53%, transparent 54%);
+        transform: rotate(-7deg);
+      }
+
+      .hero-grid {
+        position: relative;
+        z-index: 1;
+        align-items: center;
+      }
+
+      h1 {
+        color: #f6f8f2;
+        font-size: clamp(42px, 5vw, 64px);
+        line-height: 1.06;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 700px;
+        color: rgba(246, 248, 242, 0.82);
+      }
+
+      .notice {
+        border-color: rgba(21, 92, 79, 0.18);
+        background: rgba(251, 252, 248, 0.9);
+        box-shadow: none;
+      }
+
+      .notice strong {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        padding: 5px 10px;
+      }
+
+      .ritual {
+        border: 0;
+        gap: 10px;
+        overflow: visible;
+        background: transparent;
+      }
+
+      .ritual-step {
+        position: relative;
+        border: 1px solid rgba(174, 191, 182, 0.7);
+        border-radius: var(--radius);
+        background: rgba(251, 252, 248, 0.82);
+        box-shadow: none;
+      }
+
+      .ritual-step::after {
+        content: "";
+        position: absolute;
+        right: 14px;
+        top: 14px;
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--seal);
+        opacity: 0.72;
+      }
+
+      .workspace {
+        grid-template-columns: 400px minmax(0, 1fr);
+        gap: 24px;
+      }
+
+      .panel,
+      .summary,
+      .people-panel,
+      .source-note,
+      .name-card {
+        border-color: rgba(174, 191, 182, 0.75);
+        background: rgba(251, 252, 248, 0.88);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .input-panel {
+        border-color: rgba(21, 92, 79, 0.24);
+        background:
+          linear-gradient(180deg, rgba(220, 235, 226, 0.48), transparent 220px),
+          rgba(251, 252, 248, 0.94);
+      }
+
+      .panel-head {
+        border-bottom-color: rgba(174, 191, 182, 0.72);
+        background: rgba(238, 244, 239, 0.62);
+      }
+
+      .panel-head h2,
+      .summary h2,
+      .people-head h2 {
+        letter-spacing: 0.01em;
+      }
+
+      label {
+        color: #273a34;
+      }
+
+      input,
+      select,
+      textarea {
+        border-color: rgba(174, 191, 182, 0.95);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.86);
+        box-shadow: none;
+      }
+
+      .primary {
+        border-radius: 999px;
+        background: var(--accent-dark);
+        box-shadow: none;
+      }
+
+      .primary:hover {
+        background: var(--accent);
+      }
+
+      .secondary {
+        border-color: rgba(21, 92, 79, 0.28);
+        border-radius: 999px;
+        background: rgba(251, 252, 248, 0.84);
+      }
+
+      .secondary:hover {
+        border-color: rgba(21, 92, 79, 0.52);
+        background: #fff;
+      }
+
+      .secondary:disabled {
+        cursor: not-allowed;
+        border-color: rgba(174, 191, 182, 0.45);
+        background: rgba(238, 244, 239, 0.55);
+        color: rgba(82, 100, 95, 0.62);
+        transform: none;
+      }
+
+      .chip {
+        border-color: rgba(174, 191, 182, 0.9);
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .chip[aria-pressed="true"] {
+        border-color: rgba(166, 66, 50, 0.42);
+        background: rgba(166, 66, 50, 0.1);
+        color: #743226;
+      }
+
+      .strategy {
+        border: 0;
+        gap: 10px;
+        overflow: visible;
+        background: transparent;
+      }
+
+      .strategy-item,
+      .score-tile,
+      .person-card {
+        border: 1px solid rgba(174, 191, 182, 0.64);
+        border-radius: 13px;
+        background: rgba(247, 248, 242, 0.78);
+      }
+
+      .strategy-item span,
+      .score-tile span,
+      .person-meta {
+        color: var(--subtle);
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(5, minmax(120px, 1fr));
+      }
+
+      .score-tile strong {
+        color: var(--accent-dark);
+        font-size: 18px;
+        line-height: 1.2;
+      }
+
+      .people-panel {
+        background:
+          linear-gradient(135deg, rgba(220, 235, 226, 0.7), transparent 48%),
+          rgba(251, 252, 248, 0.9);
+      }
+
+      .person-card {
+        padding: 16px;
+      }
+
+      .person-card[aria-pressed="true"] {
+        border-color: rgba(166, 66, 50, 0.58);
+        background:
+          linear-gradient(180deg, rgba(166, 66, 50, 0.1), rgba(251, 252, 248, 0.92));
+      }
+
+      .person-keywords span,
+      .name-tag {
+        border: 1px solid rgba(21, 92, 79, 0.12);
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .result-group h3 {
+        width: fit-content;
+        border-bottom: 2px solid rgba(166, 66, 50, 0.45);
+        padding-bottom: 5px;
+        color: var(--accent-dark);
+      }
+
+      .cards {
+        grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      }
+
+      .name-card {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .name-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent), rgba(166, 66, 50, 0.8));
+      }
+
+      .name-text {
+        color: var(--accent-dark);
+        font-size: 38px;
+        font-family: "Kaiti SC", "STKaiti", "KaiTi", "PingFang SC", serif;
+        font-weight: 800;
+      }
+
+      .score strong {
+        color: var(--seal);
+      }
+
+      .reason-list {
+        color: #40524d;
+      }
+
+      .meter {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .meter-row {
+        grid-template-columns: 42px minmax(0, 1fr) 28px;
+        border-radius: 10px;
+        background: rgba(238, 244, 239, 0.72);
+        padding: 8px;
+      }
+
+      .bar {
+        background: transparent;
+      }
+
+      .bar span {
+        background: linear-gradient(90deg, rgba(21, 92, 79, 0.85), rgba(166, 66, 50, 0.75));
+      }
+
+      .empty {
+        background: rgba(251, 252, 248, 0.74);
+      }
+
+      @media (max-width: 980px) {
+        .hero-grid,
+        .ritual,
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .input-panel {
+          position: static;
+        }
+
+        .strategy,
+        .summary-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        h1 {
+          font-size: 42px;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .shell {
+          width: min(100% - 24px, 1280px);
+        }
+
+        .nav {
+          align-items: flex-start;
+          flex-direction: column;
+          justify-content: center;
+          padding: 12px 0;
+        }
+
+        h1 {
+          font-size: 34px;
+        }
+
+        .grid-2,
+        .strategy,
+        .summary-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Final craft layer: modern dossier UI with restrained Chinese editorial details. */
+      :root {
+        --bg: #eef2f0;
+        --surface: #fbfcfb;
+        --surface-soft: #e8efeb;
+        --ink: #15231f;
+        --muted: #475b55;
+        --subtle: #687a74;
+        --line: #c9d6cf;
+        --line-strong: #9dafaa;
+        --accent: #155f52;
+        --accent-dark: #0b322c;
+        --accent-soft: #dcebe5;
+        --blue: #2f5d68;
+        --blue-soft: #e1ecee;
+        --gold: #80652a;
+        --gold-soft: #eee6d1;
+        --red: #91392f;
+        --red-soft: #f0dfdc;
+        --green: #236f58;
+        --green-soft: #dfeee6;
+        --seal: #a64232;
+        --radius: 12px;
+        --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+        --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+      }
+
+      body {
+        background:
+          radial-gradient(circle at 8% 0%, rgba(21, 95, 82, 0.12), transparent 28%),
+          linear-gradient(180deg, #f4f7f5 0%, var(--bg) 46%, #e8eeee 100%);
+        color: var(--ink);
+      }
+
+      h1,
+      h2,
+      h3 {
+        text-wrap: balance;
+      }
+
+      p,
+      li {
+        text-wrap: pretty;
+      }
+
+      .shell {
+        width: min(1340px, calc(100% - 48px));
+      }
+
+      .topbar {
+        border-bottom-color: rgba(21, 35, 31, 0.1);
+        background: rgba(244, 247, 245, 0.88);
+        box-shadow: none;
+      }
+
+      .brand {
+        gap: 10px;
+        color: var(--accent-dark);
+      }
+
+      .mark {
+        width: 32px;
+        height: 32px;
+        border-radius: 7px;
+        background: var(--seal);
+        font-family: "Kaiti SC", "STKaiti", "KaiTi", serif;
+        box-shadow: none;
+      }
+
+      .nav span:last-child {
+        color: var(--muted);
+      }
+
+      .hero {
+        margin-top: 22px;
+        padding: clamp(28px, 4.5vw, 54px);
+        border: 1px solid rgba(11, 50, 44, 0.18);
+        border-radius: 16px;
+        background:
+          linear-gradient(115deg, rgba(11, 50, 44, 0.98) 0%, rgba(15, 68, 58, 0.96) 62%, rgba(164, 66, 50, 0.14) 62.2%, rgba(251, 252, 251, 0.95) 62.5%),
+          var(--accent-dark);
+        box-shadow: none;
+      }
+
+      .hero::before {
+        right: clamp(18px, 4vw, 44px);
+        bottom: clamp(18px, 4vw, 40px);
+        width: 76px;
+        height: 76px;
+        border: 2px solid rgba(166, 66, 50, 0.72);
+        color: rgba(166, 66, 50, 0.84);
+        font-size: 40px;
+      }
+
+      .hero-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+        gap: clamp(22px, 4vw, 44px);
+      }
+
+      h1 {
+        max-width: 780px;
+        color: #f8fbf6;
+        font-size: clamp(36px, 5vw, 62px);
+        line-height: 1.08;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 68ch;
+        color: rgba(248, 251, 246, 0.86);
+        font-size: clamp(16px, 1.6vw, 18px);
+      }
+
+      .notice {
+        border-color: rgba(11, 50, 44, 0.16);
+        border-radius: 12px;
+        background: rgba(251, 252, 251, 0.94);
+        box-shadow: none;
+      }
+
+      .notice strong {
+        border-radius: 999px;
+        background: rgba(21, 95, 82, 0.1);
+        color: var(--accent-dark);
+      }
+
+      .ritual {
+        position: relative;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0;
+        overflow: hidden;
+        border: 1px solid rgba(21, 35, 31, 0.12);
+        border-radius: 14px;
+        background: var(--surface);
+      }
+
+      .ritual-step {
+        min-height: 136px;
+        border: 0;
+        border-right: 1px solid rgba(21, 35, 31, 0.1);
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        padding: 18px 18px 20px;
+      }
+
+      .ritual-step:last-child {
+        border-right: 0;
+      }
+
+      .ritual-step::after {
+        top: auto;
+        right: 18px;
+        bottom: 18px;
+        width: 22px;
+        height: 22px;
+        border: 1px solid rgba(166, 66, 50, 0.44);
+        border-radius: 6px;
+        background: transparent;
+      }
+
+      .ritual-step span {
+        color: var(--seal);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 12px;
+      }
+
+      .ritual-step strong {
+        color: var(--accent-dark);
+      }
+
+      .workspace {
+        grid-template-columns: 400px minmax(0, 1fr);
+        gap: 24px;
+      }
+
+      .panel,
+      .summary,
+      .people-panel,
+      .source-note,
+      .name-card {
+        border-color: rgba(21, 35, 31, 0.13);
+        background: rgba(251, 252, 251, 0.94);
+        box-shadow: none;
+      }
+
+      .input-panel {
+        border-color: rgba(21, 95, 82, 0.24);
+        background:
+          linear-gradient(180deg, rgba(220, 235, 229, 0.72), rgba(251, 252, 251, 0.96) 210px),
+          var(--surface);
+      }
+
+      .panel-head {
+        border-bottom-color: rgba(21, 35, 31, 0.1);
+        background: rgba(232, 239, 235, 0.78);
+      }
+
+      label {
+        color: #20332e;
+      }
+
+      input,
+      select,
+      textarea {
+        border-color: rgba(93, 116, 108, 0.36);
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: none;
+        transition:
+          border-color 160ms var(--ease-out),
+          background-color 160ms var(--ease-out),
+          outline-color 160ms var(--ease-out);
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: #5f716b;
+      }
+
+      button,
+      .secondary,
+      .chip,
+      .person-card {
+        transition:
+          background-color 180ms var(--ease-out),
+          border-color 180ms var(--ease-out),
+          color 180ms var(--ease-out),
+          transform 140ms var(--ease-out);
+      }
+
+      button:active:not(:disabled),
+      .secondary:active:not(:disabled),
+      .chip:active,
+      .person-card:active {
+        transform: scale(0.97);
+      }
+
+      .primary {
+        min-height: 50px;
+        border-radius: 10px;
+        background: var(--accent-dark);
+        box-shadow: none;
+      }
+
+      .primary:hover,
+      .person-card:hover {
+        transform: none;
+      }
+
+      .secondary {
+        border-color: rgba(21, 95, 82, 0.28);
+        border-radius: 999px;
+        background: #fff;
+        color: var(--accent-dark);
+      }
+
+      .chip {
+        border-color: rgba(93, 116, 108, 0.32);
+        background: #fff;
+      }
+
+      .chip[aria-pressed="true"] {
+        border-color: rgba(166, 66, 50, 0.48);
+        background: rgba(166, 66, 50, 0.1);
+        color: #743024;
+      }
+
+      .strategy {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0;
+        overflow: hidden;
+        border: 1px solid rgba(21, 35, 31, 0.12);
+        border-radius: 14px;
+        background: var(--surface);
+      }
+
+      .strategy-item {
+        border-right: 1px solid rgba(21, 35, 31, 0.1);
+        background: transparent;
+      }
+
+      .strategy-item:last-child {
+        border-right: 0;
+      }
+
+      .strategy-item span,
+      .score-tile span,
+      .person-meta {
+        color: var(--subtle);
+      }
+
+      .strategy-item strong,
+      .score-tile strong {
+        color: var(--accent-dark);
+      }
+
+      .summary,
+      .people-panel {
+        border-radius: 14px;
+        padding: 20px;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(5, minmax(118px, 1fr));
+      }
+
+      .score-tile {
+        border: 1px solid rgba(21, 35, 31, 0.1);
+        border-radius: 10px;
+        background: rgba(232, 239, 235, 0.7);
+      }
+
+      .people-panel {
+        background:
+          linear-gradient(135deg, rgba(21, 95, 82, 0.1), transparent 42%),
+          rgba(251, 252, 251, 0.96);
+      }
+
+      .person-card {
+        border: 1px solid rgba(21, 35, 31, 0.12);
+        border-radius: 11px;
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      .person-card[aria-pressed="true"] {
+        border-color: rgba(166, 66, 50, 0.58);
+        background:
+          linear-gradient(180deg, rgba(166, 66, 50, 0.1), rgba(255, 255, 255, 0.86));
+      }
+
+      .person-keywords span,
+      .name-tag {
+        border: 1px solid rgba(21, 95, 82, 0.14);
+        background: #fff;
+      }
+
+      .result-group h3 {
+        width: fit-content;
+        border-bottom: 2px solid rgba(166, 66, 50, 0.48);
+        padding-bottom: 5px;
+        color: var(--accent-dark);
+      }
+
+      .cards {
+        grid-template-columns: repeat(auto-fit, minmax(318px, 1fr));
+        gap: 16px;
+      }
+
+      .name-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 14px;
+        padding: 19px;
+      }
+
+      .name-card::before {
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent), rgba(166, 66, 50, 0.82));
+      }
+
+      .name-text {
+        color: var(--accent-dark);
+        font-family: "Kaiti SC", "STKaiti", "KaiTi", "PingFang SC", serif;
+        font-size: 38px;
+        font-weight: 800;
+      }
+
+      .score {
+        min-width: 66px;
+      }
+
+      .score strong {
+        color: var(--seal);
+      }
+
+      .score-trigger {
+        min-width: 76px;
+        border: 1px solid rgba(25, 163, 141, 0.1);
+        border-radius: 13px;
+        background: rgba(216, 242, 237, 0.88);
+        padding: 10px 9px;
+        text-align: center;
+      }
+
+      .score-trigger strong {
+        color: var(--rose);
+        font-size: 32px;
+        letter-spacing: 0;
+      }
+
+      .score-trigger span {
+        color: #34504a;
+        font-size: 13px;
+      }
+
+      .reason-list {
+        color: #3d504a;
+      }
+
+      .meter {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .meter-row {
+        grid-template-columns: 42px minmax(0, 1fr) 28px;
+        border: 1px solid rgba(21, 35, 31, 0.08);
+        border-radius: 10px;
+        background: rgba(232, 239, 235, 0.58);
+        padding: 8px;
+      }
+
+      .bar {
+        background: rgba(21, 35, 31, 0.08);
+      }
+
+      .bar span {
+        background: linear-gradient(90deg, var(--accent), rgba(166, 66, 50, 0.8));
+      }
+
+      .empty,
+      .source-note {
+        background: rgba(251, 252, 251, 0.88);
+      }
+
+      .example-card {
+        border-color: rgba(21, 35, 31, 0.13);
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 250, 248, 0.9));
+      }
+
+      .example-card:nth-child(2) {
+        background:
+          linear-gradient(150deg, rgba(232, 245, 241, 0.8), rgba(255, 255, 255, 0.94));
+      }
+
+      .example-label {
+        background: rgba(25, 163, 141, 0.12);
+        color: var(--accent-dark);
+      }
+
+      @media (hover: hover) and (pointer: fine) {
+        .primary:hover {
+          background: var(--accent);
+          transform: translateY(-1px);
+        }
+
+        .secondary:hover,
+        .chip:hover,
+        .person-card:hover {
+          border-color: rgba(21, 95, 82, 0.52);
+          background: #fff;
+          transform: translateY(-1px);
+        }
+      }
+
+      @media (max-width: 980px) {
+        .hero {
+          background: linear-gradient(135deg, rgba(11, 50, 44, 0.98), rgba(21, 95, 82, 0.94));
+        }
+
+        .hero-grid,
+        .ritual,
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .ritual-step {
+          min-height: auto;
+          border-right: 0;
+          border-bottom: 1px solid rgba(21, 35, 31, 0.1);
+        }
+
+        .ritual-step:last-child {
+          border-bottom: 0;
+        }
+
+        .input-panel {
+          position: static;
+          max-height: none;
+        }
+
+        .strategy,
+        .summary-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 620px) {
+        .shell {
+          width: min(100% - 24px, 1340px);
+        }
+
+        .hero {
+          margin-top: 14px;
+          padding: 26px 20px;
+        }
+
+        .hero::before {
+          width: 58px;
+          height: 58px;
+          font-size: 30px;
+          opacity: 0.55;
+        }
+
+        h1 {
+          font-size: 34px;
+        }
+
+        .people-head {
+          display: grid;
+        }
+
+        .grid-2,
+        .strategy,
+        .summary-grid,
+        .example-grid,
+        .meter,
+        .cards {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Livelier art layer: bright ink accents, tactile chips, and modern naming energy. */
+      :root {
+        --fresh: #19a38d;
+        --fresh-soft: #d8f2ed;
+        --sun: #d99b35;
+        --sun-soft: #f7ecd0;
+        --ink-2: #102b35;
+        --rose: #c85645;
+      }
+
+      body {
+        background:
+          radial-gradient(circle at 12% 0%, rgba(25, 163, 141, 0.18), transparent 26%),
+          radial-gradient(circle at 86% 18%, rgba(217, 155, 53, 0.14), transparent 24%),
+          linear-gradient(180deg, #f5f8f6 0%, var(--bg) 46%, #e7eeee 100%);
+      }
+
+      .mark {
+        background:
+          linear-gradient(135deg, var(--rose), #8f3028);
+      }
+
+      .hero {
+        background:
+          radial-gradient(circle at 76% 26%, rgba(217, 155, 53, 0.28), transparent 18%),
+          linear-gradient(115deg, rgba(11, 50, 44, 0.99) 0%, rgba(16, 77, 67, 0.97) 56%, rgba(25, 163, 141, 0.2) 56.3%, rgba(251, 252, 251, 0.96) 57%),
+          var(--accent-dark);
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        right: 124px;
+        bottom: 34px;
+        width: 132px;
+        height: 42px;
+        border-top: 2px solid rgba(217, 155, 53, 0.68);
+        border-bottom: 1px solid rgba(25, 163, 141, 0.42);
+        transform: rotate(-9deg);
+        opacity: 0.9;
+      }
+
+      .notice {
+        border-color: rgba(25, 163, 141, 0.28);
+      }
+
+      .ritual-step {
+        background:
+          linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(232, 245, 241, 0.64));
+      }
+
+      .ritual-step::after {
+        border-color: rgba(200, 86, 69, 0.55);
+        background: rgba(200, 86, 69, 0.08);
+        transform: rotate(8deg);
+      }
+
+      .input-panel {
+        background:
+          radial-gradient(circle at 20% 6%, rgba(25, 163, 141, 0.16), transparent 28%),
+          linear-gradient(180deg, rgba(220, 235, 229, 0.72), rgba(251, 252, 251, 0.96) 210px),
+          var(--surface);
+      }
+
+      .input-panel {
+        border-color: rgba(25, 163, 141, 0.38);
+        background:
+          radial-gradient(circle at 16% 0%, rgba(25, 163, 141, 0.24), transparent 30%),
+          linear-gradient(180deg, rgba(216, 242, 237, 0.92), rgba(251, 252, 251, 0.96) 235px),
+          var(--surface);
+      }
+
+      .panel-head p {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .direction-cue {
+        width: 24px;
+        height: 24px;
+        display: inline-grid;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--accent-dark);
+        color: #fff;
+        font-size: 15px;
+        line-height: 1;
+      }
+
+      .primary {
+        position: relative;
+        overflow: hidden;
+        background:
+          linear-gradient(135deg, var(--accent-dark), #137365);
+        color: #fff;
+      }
+
+      .primary::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transform: translateX(-110%);
+        transition: transform 260ms var(--ease-out);
+      }
+
+      .chip {
+        background:
+          linear-gradient(180deg, #fff, rgba(248, 251, 250, 0.9));
+      }
+
+      .chip[aria-pressed="true"] {
+        border-color: rgba(200, 86, 69, 0.5);
+        background:
+          linear-gradient(135deg, rgba(200, 86, 69, 0.13), rgba(25, 163, 141, 0.12));
+      }
+
+      .score-tile,
+      .strategy-item {
+        background: rgba(255, 255, 255, 0.86);
+      }
+
+      .people-panel {
+        background:
+          radial-gradient(circle at 8% 10%, rgba(25, 163, 141, 0.16), transparent 22%),
+          linear-gradient(135deg, rgba(220, 235, 229, 0.68), transparent 48%),
+          rgba(251, 252, 251, 0.96);
+      }
+
+      .person-card {
+        background: rgba(255, 255, 255, 0.88);
+      }
+
+      .person-card[aria-pressed="true"] {
+        background:
+          linear-gradient(145deg, rgba(200, 86, 69, 0.12), rgba(216, 242, 237, 0.7));
+      }
+
+      .result-group h3 {
+        border-bottom-color: rgba(25, 163, 141, 0.7);
+      }
+
+      .name-card {
+        background: rgba(255, 255, 255, 0.96);
+      }
+
+      .name-card::before {
+        height: 4px;
+        background: linear-gradient(90deg, var(--fresh), var(--sun), var(--rose));
+      }
+
+      .name-text {
+        color: var(--ink-2);
+      }
+
+      .score strong {
+        color: var(--rose);
+      }
+
+      .bar span {
+        background: linear-gradient(90deg, var(--fresh), var(--sun), var(--rose));
+      }
+
+      @media (hover: hover) and (pointer: fine) {
+        .primary:hover::after {
+          transform: translateX(110%);
+        }
+
+        .name-card:hover {
+          border-color: rgba(25, 163, 141, 0.34);
+          transform: translateY(-2px);
+        }
+
+        .ritual-step:hover {
+          background:
+            linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(216, 242, 237, 0.72));
+        }
+      }
+
+      .name-card {
+        transition:
+          border-color 180ms var(--ease-out),
+          background-color 180ms var(--ease-out),
+          transform 180ms var(--ease-out);
+      }
+
+      .ritual-step {
+        transition:
+          background-color 180ms var(--ease-out),
+          transform 180ms var(--ease-out);
+      }
+
+      /* Clarity pass: keep the first screen focused, reveal analysis after generation. */
+      .hero {
+        padding: clamp(22px, 3.2vw, 38px);
+      }
+
+      .hero-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 330px);
+      }
+
+      h1 {
+        max-width: 680px;
+        font-size: clamp(34px, 4.2vw, 54px);
+      }
+
+      .lead {
+        max-width: 60ch;
+      }
+
+      .notice {
+        padding: 14px;
+      }
+
+      .ritual {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: 8px;
+      }
+
+      .ritual-step {
+        min-height: auto;
+        padding: 12px 14px;
+      }
+
+      .ritual-step p,
+      .ritual-step::after {
+        display: none;
+      }
+
+      .ritual-step strong {
+        margin-top: 2px;
+        font-size: 15px;
+      }
+
+      .panel-head {
+        padding: 16px 18px 14px;
+      }
+
+      .form-body {
+        gap: 13px;
+        padding: 18px;
+      }
+
+      .optional-title {
+        margin: 4px 0 -2px;
+        color: var(--subtle);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .chip-row {
+        max-height: 96px;
+        overflow: hidden;
+      }
+
+      .output:not(.has-results) .generated-only {
+        display: none;
+      }
+
+      .result-list {
+        order: 1;
+      }
+
+      .strategy {
+        order: 2;
+      }
+
+      .summary {
+        order: 3;
+      }
+
+      .people-panel {
+        order: 4;
+      }
+
+      .source-note {
+        order: 5;
+      }
+
+      .candidate-overview {
+        display: grid;
+        gap: 10px;
+        border: 1px solid rgba(25, 163, 141, 0.22);
+        border-radius: 14px;
+        background:
+          linear-gradient(135deg, rgba(216, 242, 237, 0.72), rgba(255, 255, 255, 0.94));
+        padding: 14px;
+      }
+
+      @media (max-width: 620px) {
+        .candidate-overview-head {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .overview-official {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .score-panel-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .candidate-overview h3 {
+        color: var(--accent-dark);
+        font-size: 18px;
+      }
+
+      .candidate-overview-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .overview-official {
+        min-height: 34px;
+        padding: 7px 12px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .candidate-rail {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .candidate-pill {
+        border: 1px solid rgba(21, 95, 82, 0.18);
+        border-radius: 999px;
+        background: #fff;
+        color: var(--ink-2);
+        padding: 7px 11px;
+        font-family: "Kaiti SC", "STKaiti", "KaiTi", "PingFang SC", serif;
+        font-size: 20px;
+        font-weight: 800;
+        line-height: 1.1;
+        text-align: center;
+      }
+
+      .flow-track {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        margin-top: 12px;
+      }
+
+      .flow-track span {
+        position: relative;
+        min-height: 28px;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(21, 95, 82, 0.14);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.68);
+        color: #52645f;
+        font-size: 12px;
+        font-weight: 800;
+        transition:
+          background-color 180ms var(--ease-out),
+          border-color 180ms var(--ease-out),
+          color 180ms var(--ease-out),
+          transform 140ms var(--ease-out);
+      }
+
+      .flow-track span.is-active {
+        border-color: rgba(25, 163, 141, 0.42);
+        background: rgba(216, 242, 237, 0.82);
+        color: var(--accent-dark);
+      }
+
+      .flow-track span.is-done {
+        border-color: rgba(166, 66, 50, 0.24);
+        background: rgba(247, 236, 208, 0.78);
+        color: #694033;
+      }
+
+      .primary.is-loading {
+        cursor: wait;
+      }
+
+      .primary .button-label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition:
+          opacity 180ms var(--ease-out),
+          filter 180ms var(--ease-out);
+      }
+
+      .primary.is-loading .button-label::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: currentColor;
+        opacity: 0.8;
+        transform: scale(0.92);
+      }
+
+      .result-list.just-generated > * {
+        opacity: 0;
+        transform: translateY(8px);
+        animation: settle-in 220ms var(--ease-out) forwards;
+      }
+
+      .result-list.just-generated > *:nth-child(2) {
+        animation-delay: 35ms;
+      }
+
+      .result-list.just-generated > *:nth-child(3) {
+        animation-delay: 70ms;
+      }
+
+      @keyframes settle-in {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .result-brief {
+        display: grid;
+        grid-template-columns: minmax(180px, 0.9fr) minmax(0, 1.35fr);
+        gap: 14px;
+        border: 1px solid rgba(21, 95, 82, 0.16);
+        border-radius: 14px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(216, 242, 237, 0.58));
+        padding: 16px;
+      }
+
+      .brief-lead {
+        display: grid;
+        align-content: start;
+        gap: 7px;
+      }
+
+      .brief-lead span,
+      .brief-list span,
+      .insight-list span {
+        color: var(--subtle);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .brief-lead h2 {
+        color: var(--accent-dark);
+        font-size: 21px;
+        line-height: 1.2;
+      }
+
+      .brief-lead p {
+        color: #40524d;
+        font-size: 14px;
+      }
+
+      .brief-list,
+      .insight-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+      }
+
+      .insight-list div:last-child {
+        grid-column: 1 / -1;
+      }
+
+      .brief-list div,
+      .insight-list div {
+        border: 1px solid rgba(21, 35, 31, 0.08);
+        border-radius: 11px;
+        background: rgba(255, 255, 255, 0.72);
+        padding: 10px 11px;
+      }
+
+      .brief-list p,
+      .insight-list p {
+        margin-top: 4px;
+        color: #2f433d;
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .insight-panel {
+        display: grid;
+        gap: 12px;
+      }
+
+      .person-card {
+        align-content: start;
+      }
+
+      .person-card .person-detail {
+        display: none;
+      }
+
+      .person-card[aria-expanded="true"] .person-detail {
+        display: grid;
+        gap: 9px;
+      }
+
+      .person-card[aria-expanded="false"] p {
+        display: none;
+      }
+
+      .person-card[aria-expanded="false"] .person-keywords {
+        display: none;
+      }
+
+      .person-expand {
+        width: fit-content;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        color: var(--accent-dark);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .person-check {
+        cursor: pointer;
+      }
+
+      .person-check,
+      .person-expand {
+        transition:
+          color 160ms var(--ease-out),
+          background-color 160ms var(--ease-out),
+          border-color 160ms var(--ease-out),
+          transform 120ms var(--ease-out);
+      }
+
+      .person-check:active,
+      .person-expand:active {
+        transform: scale(0.97);
+      }
+
+      /* Atmospheric color layer: keep color in empty/background space, not in static content. */
+      :root {
+        --fresh: #19a38d;
+        --sun: #d99b35;
+        --rose: #c85645;
+        --sky: #3f7f94;
+        --violet: #7560a8;
+        --fresh-soft: #d8f2ed;
+        --sun-soft: #f7ecd0;
+        --rose-soft: #f6dfd9;
+        --sky-soft: #e1f0f4;
+        --violet-soft: #ebe6f5;
+      }
+
+      body {
+        background:
+          radial-gradient(circle at 10% 6%, rgba(25, 163, 141, 0.16), transparent 25%),
+          radial-gradient(circle at 86% 10%, rgba(217, 155, 53, 0.16), transparent 23%),
+          radial-gradient(circle at 90% 72%, rgba(63, 127, 148, 0.13), transparent 26%),
+          linear-gradient(180deg, #f7f8f4 0%, #eef4f1 45%, #e9eeee 100%);
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        z-index: 0;
+        pointer-events: none;
+        user-select: none;
+      }
+
+      body::before {
+        top: 106px;
+        right: max(18px, calc((100vw - 1340px) / 2));
+        width: min(340px, 32vw);
+        aspect-ratio: 1;
+        border: 1px solid rgba(21, 95, 82, 0.08);
+        border-radius: 999px;
+        background:
+          radial-gradient(circle, transparent 0 28%, rgba(21, 95, 82, 0.045) 28.5% 29%, transparent 29.5% 45%, rgba(217, 155, 53, 0.06) 45.5% 46%, transparent 46.5%),
+          conic-gradient(from 18deg, rgba(21, 95, 82, 0.06), transparent 12deg 48deg, rgba(217, 155, 53, 0.055) 60deg, transparent 72deg 118deg, rgba(200, 86, 69, 0.045) 132deg, transparent 148deg 360deg);
+        mask-image: radial-gradient(circle, rgba(0, 0, 0, 0.92), transparent 72%);
+      }
+
+      body::after {
+        left: max(18px, calc((100vw - 1340px) / 2));
+        bottom: 42px;
+        width: min(380px, 36vw);
+        height: 180px;
+        border: 1px solid rgba(21, 95, 82, 0.08);
+        border-radius: 18px;
+        background:
+          linear-gradient(90deg, rgba(21, 95, 82, 0.06) 1px, transparent 1px),
+          linear-gradient(0deg, rgba(21, 95, 82, 0.05) 1px, transparent 1px);
+        background-size: 34px 34px;
+        mask-image: linear-gradient(135deg, rgba(0, 0, 0, 0.92), transparent 72%);
+      }
+
+      .topbar,
+      .shell {
+        position: relative;
+        z-index: 1;
+      }
+
+      .mark {
+        background:
+          linear-gradient(135deg, var(--fresh), var(--sun));
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: auto -12% -42% 45%;
+        height: 210px;
+        border-radius: 999px;
+        background:
+          radial-gradient(circle at 28% 42%, rgba(25, 163, 141, 0.18), transparent 30%),
+          radial-gradient(circle at 72% 48%, rgba(217, 155, 53, 0.2), transparent 34%);
+        pointer-events: none;
+      }
+
+      .workspace {
+        position: relative;
+      }
+
+      .workspace::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        inset: 42px -20px auto;
+        height: 280px;
+        border-radius: 28px;
+        background:
+          linear-gradient(90deg, rgba(25, 163, 141, 0.09), transparent 32%),
+          radial-gradient(circle at 88% 12%, rgba(200, 86, 69, 0.1), transparent 28%);
+        pointer-events: none;
+      }
+
+      .workspace::after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        right: -48px;
+        top: 42%;
+        width: 148px;
+        height: 230px;
+        border-radius: 38px;
+        background:
+          radial-gradient(circle at 68% 18%, rgba(200, 86, 69, 0.1) 0 14px, transparent 15px),
+          radial-gradient(circle at 30% 76%, rgba(217, 155, 53, 0.12) 0 18px, transparent 19px),
+          linear-gradient(135deg, rgba(25, 163, 141, 0.08), rgba(255, 255, 255, 0));
+        transform: rotate(8deg);
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .notice {
+        border-color: rgba(217, 155, 53, 0.34);
+        background:
+          linear-gradient(135deg, rgba(247, 236, 208, 0.88), rgba(255, 255, 255, 0.88));
+      }
+
+      .flow-track span.is-active {
+        border-color: rgba(25, 163, 141, 0.52);
+        background:
+          linear-gradient(135deg, var(--fresh-soft), rgba(255, 255, 255, 0.86));
+      }
+
+      .flow-track span.is-done {
+        border-color: rgba(217, 155, 53, 0.4);
+        background:
+          linear-gradient(135deg, var(--sun-soft), rgba(255, 255, 255, 0.84));
+      }
+
+      .chip[aria-pressed="true"] {
+        border-color: rgba(25, 163, 141, 0.46);
+        color: var(--accent-dark);
+        background:
+          linear-gradient(135deg, rgba(216, 242, 237, 0.92), rgba(255, 255, 255, 0.82));
+      }
+
+      .result-brief {
+        border-color: rgba(21, 95, 82, 0.16);
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 247, 0.92));
+      }
+
+      .brief-list div,
+      .insight-list div {
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .candidate-overview {
+        border-color: rgba(63, 127, 148, 0.22);
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(248, 250, 247, 0.94));
+      }
+
+      .name-card::before {
+        background: linear-gradient(90deg, rgba(25, 163, 141, 0.72), rgba(217, 155, 53, 0.58));
+      }
+
+      .name-tag,
+      .person-keywords span,
+      .candidate-pill {
+        background: rgba(255, 255, 255, 0.82);
+      }
+
+      .score-trigger {
+        background:
+          linear-gradient(135deg, rgba(216, 242, 237, 0.94), rgba(247, 236, 208, 0.74));
+      }
+
+      .person-card {
+        background: rgba(255, 255, 255, 0.88);
+      }
+
+      .example-preview {
+        gap: 12px;
+      }
+
+      .example-head {
+        align-items: flex-start;
+      }
+
+      .example-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .example-card {
+        padding: 15px;
+      }
+
+      .example-card ul {
+        gap: 6px;
+      }
+
+      @media (max-width: 980px) {
+        body::before {
+          top: 92px;
+          right: 18px;
+          width: 220px;
+          opacity: 0.7;
+        }
+
+        body::after,
+        .workspace::after {
+          display: none;
+        }
+
+        .ritual,
+        .example-grid,
+        .result-brief {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Interaction restructure: results first, evidence second, compact controls. */
+      .form-cta {
+        border-top-color: rgba(21, 95, 82, 0.16);
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(216, 242, 237, 0.82));
+      }
+
+      .form-cta .primary {
+        width: 100%;
+      }
+
+      .result-list {
+        order: 1;
+      }
+
+      .support-module {
+        order: 2;
+        background:
+          radial-gradient(circle at 6% 0%, rgba(25, 163, 141, 0.12), transparent 22%),
+          rgba(251, 252, 251, 0.9);
+      }
+
+      .support-module .strategy,
+      .support-module .summary,
+      .support-module .people-panel,
+      .support-module .source-note {
+        order: initial;
+      }
+
+      .support-head {
+        border-bottom: 1px solid rgba(21, 35, 31, 0.1);
+        padding-bottom: 4px;
+      }
+
+      .score {
+        text-align: right;
+      }
+
+      .icon-button {
+        transition:
+          background-color 180ms var(--ease-out),
+          border-color 180ms var(--ease-out),
+          transform 140ms var(--ease-out);
+      }
+
+      .icon-button:active:not(:disabled) {
+        transform: scale(0.97);
+      }
+
+      .official-guide {
+        border-color: rgba(47, 93, 104, 0.14);
+        background:
+          linear-gradient(135deg, rgba(47, 93, 104, 0.1), rgba(216, 242, 237, 0.68));
+      }
+
+      .official-guide h3,
+      .support-head h2 {
+        color: var(--accent-dark);
+      }
+
+      .name-actions {
+        justify-content: flex-end;
+      }
+
+      @media (hover: hover) and (pointer: fine) {
+        .icon-button:hover {
+          border-color: rgba(21, 95, 82, 0.52);
+          background: #fff;
+          transform: translateY(-1px);
+        }
+      }
+
+      @media (max-width: 620px) {
+        .guide-steps {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          scroll-behavior: auto !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="shell nav">
+        <div class="brand">
+          <span class="mark">名</span>
+          <span>取名决策雷达</span>
+        </div>
+        <span>先生成候选名，再做官方同名验证</span>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <h1>给孩子取一个有来处、不过时、少撞名的名字。</h1>
+            <p class="lead">
+              输入出生信息、家庭偏好和指定字，综合命理五行、重名风险、音律字形、寓意典故与趋势稳定性，生成一组可解释的候选名。
+            </p>
+          </div>
+          <div class="notice">
+            <strong>查重边界</strong>
+            <span>
+              候选名会先避开高频字、热门组合和网红审美，最终同名人数可跳转公安部一网通办进行验证。
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section class="ritual" aria-label="命名决策流程">
+        <div class="ritual-step">
+          <span>第一步</span>
+          <strong>填写孩子信息</strong>
+          <p>输入出生时间、城市和基础偏好。</p>
+        </div>
+        <div class="ritual-step">
+          <span>第二步</span>
+          <strong>选择家庭意象</strong>
+          <p>选 1-5 个喜欢的气质方向。</p>
+        </div>
+        <div class="ritual-step">
+          <span>第三步</span>
+          <strong>生成候选并查重</strong>
+          <p>保留少量候选，再做官方验证。</p>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <form class="panel input-panel" id="namingForm">
+          <div class="panel-head">
+            <h2>输入信息</h2>
+            <p><span class="direction-cue">↙</span>先填写这里，再选择 1-5 个偏好意象，系统会生成候选名和解释。</p>
+            <div class="flow-track" aria-label="取名生成流程">
+              <span data-flow-step="input">信息</span>
+              <span data-flow-step="taste">偏好</span>
+              <span data-flow-step="result">候选</span>
+            </div>
+          </div>
+          <div class="form-body">
+            <div class="grid-2">
+              <label>
+                姓氏
+                <input id="surname" maxlength="2" placeholder="如：李" required />
+              </label>
+              <label>
+                性别
+                <select id="gender">
+                  <option value="boy">男孩</option>
+                  <option value="girl">女孩</option>
+                  <option value="neutral">不限定</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="grid-2">
+              <label>
+                出生日期时间
+                <input id="birth" type="datetime-local" required />
+              </label>
+              <label>
+                出生城市
+                <input id="city" placeholder="如：上海" required />
+              </label>
+            </div>
+
+            <div class="grid-2">
+              <label>
+                名字字数
+                <select id="nameLength">
+                  <option value="2">双字名</option>
+                  <option value="1">单字名</option>
+                </select>
+              </label>
+              <label>
+                风格偏好
+                <select id="style">
+                  <option value="clean">清朗克制</option>
+                  <option value="classic">古典书卷</option>
+                  <option value="nature">自然生命感</option>
+                  <option value="modern">现代简洁</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="optional-title">可选补充</div>
+
+            <label>
+              必须包含字
+              <input id="requiredChars" placeholder="如：安、知。没有可留空" />
+            </label>
+
+            <label>
+              排除字
+              <input id="blockedChars" placeholder="如：梓、涵、宸" />
+            </label>
+
+            <label>
+              家长期望关键词
+              <textarea id="wishes" placeholder="如：松弛、聪慧、坚韧、书卷气"></textarea>
+            </label>
+
+            <label>
+              偏好意象
+              <div class="chip-tools">
+                <span>随机展示一批，避免只选前几个</span>
+                <button class="secondary" type="button" id="shuffleImages">换一批</button>
+              </div>
+              <div class="chip-row" id="imageChips"></div>
+            </label>
+          </div>
+          <div class="form-cta">
+            <button class="primary" type="submit"><span class="button-label">免费生成候选名</span></button>
+          </div>
+        </form>
+
+        <div class="output" id="output">
+          <div class="result-list" id="cards">
+            <div class="example-preview">
+              <div class="empty">
+                先从左侧填写姓氏、出生时间和城市，再选择几个喜欢的意象。生成后，你会看到候选名、寓意解释、命理取向、重名风险和官方查重步骤。
+              </div>
+              <div class="example-head">
+                <div>
+                  <h3>你会收到这样的反馈</h3>
+                  <p>示例仅展示反馈结构。真实候选会按出生信息、偏好意象和指定字重新生成。</p>
+                </div>
+              </div>
+              <div class="example-grid" aria-label="候选名反馈示例">
+                <article class="example-card">
+                  <span class="example-label">命理 + 意境</span>
+                  <div class="example-name">林知远</div>
+                  <ul>
+                    <li><strong>命理：</strong>用“知”的明辨与“远”的开阔回应火土取向。</li>
+                    <li><strong>典故：</strong>来自《道德经》“自知者明”与“宁静致远”的传统联想。</li>
+                    <li><strong>优势：</strong>不是堆偏旁，而是用字义补气质。</li>
+                  </ul>
+                </article>
+                <article class="example-card">
+                  <span class="example-label">重名避险</span>
+                  <div class="example-name">陈沅舟</div>
+                  <ul>
+                    <li><strong>风险：</strong>避开常见爆款字和“沐宸、梓涵”类高频组合。</li>
+                    <li><strong>出处：</strong>“沅”为水名，常见于楚地文化语境。</li>
+                    <li><strong>复核：</strong>生成后按步骤去官方平台查同名人数。</li>
+                  </ul>
+                </article>
+                <article class="example-card">
+                  <span class="example-label">名故说明</span>
+                  <div class="example-name">许棠安</div>
+                  <ul>
+                    <li><strong>意境：</strong>“棠”有海棠花木意象，“安”强调安定从容。</li>
+                    <li><strong>解释：</strong>名字能同时给父母、长辈和孩子讲得通。</li>
+                    <li><strong>控制：</strong>保留辨识度，但不过分生僻。</li>
+                  </ul>
+                </article>
+                <article class="example-card">
+                  <span class="example-label">官方查重</span>
+                  <div class="example-name">复制复核</div>
+                  <ul>
+                    <li><strong>第一步：</strong>保留 3-5 个喜欢的候选名。</li>
+                    <li><strong>第二步：</strong>进入公安一网通办或 APP 查询同名人数。</li>
+                    <li><strong>第三步：</strong>同名过高时回到页面再换一轮。</li>
+                  </ul>
+                </article>
+              </div>
+            </div>
+          </div>
+
+          <div class="support-module generated-only">
+            <div class="support-head">
+              <div>
+                <h2>取名依据与迭代</h2>
+                <p>人物灵感和偏好会参与上方候选更新；命理依据用于解释方向，不替代家庭判断。</p>
+              </div>
+            </div>
+
+            <div class="people-panel" id="peoplePanel">
+              <div class="people-head">
+                <div>
+                  <h2>同辰人物灵感</h2>
+                  <p>根据出生日期提供中外正向人物素材，用于提炼价值观和名字典故，不暗示命运相同。</p>
+                  <div class="selected-people" id="selectedPeopleNote">可选择 1-2 位人物作为价值观灵感</div>
+                </div>
+              </div>
+              <div class="people-grid" id="peopleGrid">
+                <div class="empty">填写出生日期后，会出现同辰人物灵感，可选择 1-2 位加入取名逻辑。</div>
+              </div>
+            </div>
+
+            <div class="strategy" id="strategy">
+              <div class="strategy-item">
+                <span>命理方向</span>
+                <strong>填写信息后分析</strong>
+              </div>
+              <div class="strategy-item">
+                <span>偏好意象</span>
+                <strong>选择 1-5 个</strong>
+              </div>
+              <div class="strategy-item">
+                <span>决策动作</span>
+                <strong>生成后再复核</strong>
+              </div>
+            </div>
+
+            <div class="summary insight-panel" id="metaphysicsPanel">
+              <h2>命理与姓名学依据</h2>
+              <div class="insight-list">
+                <div><span>八字原则</span><p>先看喜用，不机械缺啥补啥</p></div>
+                <div><span>姓名五行</span><p>字义、字形、音韵共同判断</p></div>
+                <div><span>五格数理</span><p>作为民俗辅助参考</p></div>
+              </div>
+            </div>
+
+            <div class="official-guide">
+              <h3>官方同名人数怎么查</h3>
+              <div class="guide-steps">
+                <div class="guide-step"><strong>第一步：复制候选名</strong><span>先从上方候选里保留 3-5 个最喜欢的名字。</span></div>
+                <div class="guide-step"><strong>第二步：进入官方平台</strong><span>打开公安一网通办或相关 APP，使用同名人数查询。</span></div>
+                <div class="guide-step"><strong>第三步：回到页面迭代</strong><span>如果同名人数过高，回到候选卡点击刷新图标替换。</span></div>
+              </div>
+              <a class="secondary" href="https://ywtb.mps.gov.cn/" target="_blank" rel="noopener noreferrer">去官方平台查询</a>
+            </div>
+
+            <div class="source-note">
+              <strong>数据口径：</strong>
+              当前重名风险基于公开姓名报告、常见新生儿名字榜、高频字和热门组合进行估算；命理模块内置四柱八字、五行喜忌、姓名五行与五格数理的知识框架，AI 仅用于扩展寓意、典故和候选解释，不替代确定性排盘。官方同名人数以公安部一网通办或相关 APP 查询结果为准。
+            </div>
+
+            <div class="source-note">
+              <strong>隐私与使用边界：</strong>
+              出生时间、城市、偏好意象和指定字仅用于本次取名建议；服务端仅用匿名 Cookie 与浏览器信息哈希控制免费生成次数，不应公开展示或售卖个人取名输入。本服务不承诺改运、改命或官方查重结果，最终名字决策应结合家庭判断与官方同名查询。
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="score-panel" id="scorePanel" role="dialog" aria-hidden="true"></div>
+
+    <script src="name-person-insights.js"></script>
+    <script>
+      const DEFAULT_WEIGHTS = { destiny: 0.3, rarity: 0.3, sound: 0.15, meaning: 0.15, trend: 0.1 };
+
+      const imageOptions = [
+        { key: "water", label: "水", elements: ["水"], tone: "灵动、包容、智慧", tags: ["water", "clean"] },
+        { key: "river", label: "川", elements: ["水"], tone: "开阔、流动、行动力", tags: ["water", "nature"] },
+        { key: "sea", label: "海", elements: ["水"], tone: "胸怀、远行、容量", tags: ["water", "vast"] },
+        { key: "rain", label: "雨", elements: ["水", "木"], tone: "润泽、滋养、细腻", tags: ["water", "soft"] },
+        { key: "moon", label: "月", elements: ["水", "金"], tone: "清雅、审美、温润", tags: ["moon", "clean"] },
+        { key: "snow", label: "雪", elements: ["水", "金"], tone: "洁净、冷静、审美", tags: ["clean", "winter"] },
+        { key: "cloud", label: "云", elements: ["水"], tone: "舒展、自由、留白", tags: ["clean", "vast"] },
+        { key: "wood", label: "竹", elements: ["木"], tone: "节制、书卷、成长", tags: ["wood", "classic"] },
+        { key: "pine", label: "松", elements: ["木"], tone: "坚韧、长青、骨气", tags: ["wood", "stable"] },
+        { key: "forest", label: "林", elements: ["木"], tone: "生命力、庇护、成长", tags: ["wood", "nature"] },
+        { key: "grain", label: "禾", elements: ["木", "土"], tone: "丰足、平实、生命感", tags: ["nature", "soft"] },
+        { key: "mountain", label: "山", elements: ["土"], tone: "稳定、骨气、承托", tags: ["stable", "nature"] },
+        { key: "field", label: "原野", elements: ["土", "木"], tone: "舒展、自由、质朴", tags: ["nature", "vast"] },
+        { key: "star", label: "星", elements: ["火"], tone: "明亮、远志、开阔", tags: ["light", "modern"] },
+        { key: "lamp", label: "灯", elements: ["火"], tone: "照见、温暖、方向", tags: ["light", "classic"] },
+        { key: "sunrise", label: "晨光", elements: ["火", "木"], tone: "新生、明朗、向上", tags: ["light", "clean"] },
+        { key: "jade", label: "玉", elements: ["金"], tone: "端正、珍重、克制", tags: ["jade", "classic"] },
+        { key: "bell", label: "钟", elements: ["金"], tone: "秩序、提醒、时间感", tags: ["metal", "classic"] },
+        { key: "book", label: "书", elements: ["木"], tone: "学养、表达、传承", tags: ["classic", "study"] },
+        { key: "inkstone", label: "砚", elements: ["土"], tone: "沉静、文气、耐心", tags: ["classic", "study"] },
+        { key: "boat", label: "舟", elements: ["水"], tone: "承载、远行、方向", tags: ["water", "modern"] },
+        { key: "courtyard", label: "庭院", elements: ["土", "木"], tone: "安放、家风、秩序", tags: ["stable", "classic"] },
+        { key: "magpie", label: "喜鹊", elements: ["木", "火"], tone: "吉祥、轻盈、生命力", tags: ["bird", "light"] },
+        { key: "crane", label: "鹤", elements: ["金", "水"], tone: "清正、长久、高洁", tags: ["bird", "classic"] },
+        { key: "swallow", label: "燕", elements: ["木", "火"], tone: "归家、灵巧、春意", tags: ["bird", "soft"] },
+        { key: "deer", label: "鹿", elements: ["木"], tone: "温和、敏捷、自然", tags: ["nature", "soft"] },
+        { key: "balance", label: "衡", elements: ["土", "金"], tone: "判断、分寸、公正", tags: ["stable", "classic"] },
+        { key: "distance", label: "远", elements: ["土"], tone: "格局、长期、开阔", tags: ["vast", "modern"] },
+        { key: "orchid", label: "兰", elements: ["木"], tone: "清雅、幽香、内在涵养", tags: ["classic", "soft", "nature"] },
+        { key: "lotus", label: "荷", elements: ["水", "木"], tone: "洁净、挺立、不随俗", tags: ["water", "classic", "clean"] },
+        { key: "plum", label: "梅", elements: ["木", "水"], tone: "耐寒、骨气、早春", tags: ["classic", "stable", "nature"] },
+        { key: "mirror", label: "镜", elements: ["金"], tone: "自省、明辨、清澈", tags: ["metal", "clean", "classic"] },
+        { key: "compass", label: "司南", elements: ["金", "土"], tone: "方向、判断、远行", tags: ["metal", "vast", "modern"] },
+        { key: "bridge", label: "桥", elements: ["木", "土"], tone: "连接、承托、抵达", tags: ["stable", "modern"] },
+        { key: "spring", label: "春山", elements: ["木", "土"], tone: "新生、舒展、含蓄", tags: ["nature", "soft", "classic"] },
+        { key: "autumn", label: "秋水", elements: ["水", "金"], tone: "清澈、审美、分寸", tags: ["water", "clean", "classic"] },
+        { key: "dawn", label: "晓", elements: ["火"], tone: "破晓、看见、希望", tags: ["light", "clean"] },
+        { key: "wind", label: "风", elements: ["木"], tone: "自由、流动、气度", tags: ["vast", "modern", "nature"] },
+        { key: "qilin", label: "麒麟", elements: ["火", "土"], tone: "祥瑞、守护、贵气", tags: ["classic", "stable"] },
+        { key: "bookcase", label: "藏书", elements: ["木", "土"], tone: "学养、积累、传承", tags: ["study", "classic", "stable"] },
+        { key: "tea", label: "茶", elements: ["木", "水"], tone: "平和、清醒、待人有礼", tags: ["classic", "soft"] },
+        { key: "bluegreen", label: "青", elements: ["木"], tone: "东方色感、生发、清朗", tags: ["clean", "nature", "classic"] },
+        { key: "vermilion", label: "朱", elements: ["火"], tone: "礼序、热情、醒目但克制", tags: ["light", "classic"] },
+        { key: "path", label: "行路", elements: ["土"], tone: "实践、长期、脚踏实地", tags: ["stable", "vast", "modern"] },
+        { key: "frost", label: "霜", elements: ["水", "金"], tone: "清冽、节制、耐寒", tags: ["clean", "winter", "classic"] },
+        { key: "creek", label: "溪", elements: ["水"], tone: "细流、清润、灵动", tags: ["water", "clean", "soft"] },
+        { key: "bank", label: "浦", elements: ["水", "土"], tone: "水岸、归处、开阔", tags: ["water", "vast", "classic"] },
+        { key: "ridge", label: "岭", elements: ["土", "木"], tone: "山脊、骨气、远望", tags: ["nature", "stable", "vast"] },
+        { key: "cave", label: "岫", elements: ["土"], tone: "山岫、含蓄、云气", tags: ["nature", "classic", "clean"] },
+        { key: "peak", label: "岑", elements: ["土"], tone: "高峻、安静、有骨相", tags: ["stable", "classic"] },
+        { key: "billow", label: "澜", elements: ["水"], tone: "波澜、气象、容量", tags: ["water", "vast"] },
+        { key: "islet", label: "汀", elements: ["水", "土"], tone: "水边、留白、清雅", tags: ["water", "clean", "soft"] },
+        { key: "oar", label: "棹", elements: ["木", "水"], tone: "行舟、方向、行动", tags: ["water", "modern", "vast"] },
+        { key: "string", label: "弦", elements: ["木"], tone: "节奏、审美、张弛", tags: ["classic", "modern", "study"] },
+        { key: "bi-jade", label: "璧", elements: ["金", "土"], tone: "玉璧、端正、珍重", tags: ["jade", "classic", "stable"] },
+        { key: "gui-jade", label: "圭", elements: ["土", "金"], tone: "礼器、分寸、端方", tags: ["jade", "classic", "stable"] },
+        { key: "paired-jade", label: "珏", elements: ["金"], tone: "双玉、相合、珍重", tags: ["jade", "classic"] },
+        { key: "sun-warm", label: "昀", elements: ["火"], tone: "日光、温明、清朗", tags: ["light", "clean"] },
+        { key: "morning-light", label: "晞", elements: ["火"], tone: "晨光、希望、转明", tags: ["light", "classic", "clean"] },
+        { key: "sweetgrass", label: "蘅", elements: ["木"], tone: "香草、古典、清芬", tags: ["classic", "soft", "nature"] },
+        { key: "angelica", label: "芷", elements: ["木"], tone: "香草、清雅、品格", tags: ["classic", "soft", "nature"] },
+        { key: "reed", label: "葭", elements: ["木", "水"], tone: "芦苇、柔韧、诗意", tags: ["water", "classic", "soft"] },
+        { key: "simple-gate", label: "衡门", elements: ["木", "土"], tone: "清简、家风、安居", tags: ["stable", "classic"] },
+        { key: "star-field", label: "星野", elements: ["火", "土"], tone: "星空、开阔、远志", tags: ["light", "vast", "modern"] },
+      ];
+
+      const chars = [
+        { c: "安", e: "土", g: "neutral", heat: 42, trend: 82, tags: ["clean", "classic", "stable"], meaning: "安定、从容、可长期使用", allusion: "可联想到安身立命、居安思危，适合表达父母希望孩子内心有秩序和安全感。", elder: "这个字不险不怪，长辈容易接受，解释为一生安定、心中有定力。" },
+        { c: "知", e: "火", g: "neutral", heat: 54, trend: 78, tags: ["classic", "modern", "study"], meaning: "知性、明辨、有书卷气", allusion: "取“知人者智，自知者明”的文化联想，重点不是聪明炫技，而是有自知与判断。", elder: "可以解释为希望孩子明理、有判断力，不只是考试聪明。" },
+        { c: "清", e: "水", g: "neutral", heat: 47, trend: 85, tags: ["clean", "water", "classic"], meaning: "清明、清正、不过度甜腻", allusion: "有清风、清明、清正的传统联想，偏向品格洁净和思路清楚。", elder: "清不是单纯补水，而是希望孩子做人清正、头脑清楚。" },
+        { c: "言", e: "木", g: "neutral", heat: 38, trend: 80, tags: ["modern", "classic", "study"], meaning: "表达、信义、逻辑感", allusion: "可联想到言而有信、嘉言懿行，强调表达与信用。", elder: "这个字重在会表达、守信用，未来职场也好用。" },
+        { c: "衡", e: "土", g: "boy", heat: 20, trend: 86, tags: ["classic", "stable"], meaning: "持衡、有判断力、不浮躁", allusion: "衡有权衡、平衡之意，适合表达分寸感和判断力。", elder: "名字里有稳重和公正的意思，不走偏、不浮躁。" },
+        { c: "宁", e: "火", g: "neutral", heat: 36, trend: 82, tags: ["clean", "stable"], meaning: "平和、安宁、稳定", allusion: "宁静致远是最直接的文化联想，强调安静中的长远力量。", elder: "希望孩子心性安宁，遇事不慌，有长期定力。" },
+        { c: "予", e: "土", g: "neutral", heat: 52, trend: 72, tags: ["modern", "soft"], meaning: "给予、开放、轻盈", allusion: "予有给予、许可之意，气质轻但不空。", elder: "表达父母愿意给予孩子空间，也希望孩子能予人善意。" },
+        { c: "川", e: "水", g: "boy", heat: 24, trend: 84, tags: ["nature", "modern", "water", "vast"], meaning: "开阔、流动、行动力", allusion: "川代表河流与地势，可联想到百川归海，格局比单纯三点水更开阔。", elder: "不是硬补水，而是取河川流动、胸怀开阔的意思。" },
+        { c: "禾", e: "木", g: "girl", heat: 45, trend: 77, tags: ["nature", "soft"], meaning: "生长、丰足、自然感", allusion: "禾为谷物，有生长和收获的生活气，避免虚浮。", elder: "希望孩子自然生长，丰足踏实，不是空泛好听。" },
+        { c: "岚", e: "土", g: "girl", heat: 33, trend: 79, tags: ["nature", "clean", "mountain"], meaning: "山间气象、清透、有层次", allusion: "岚是山间雾气，有山的稳定，也有气象的灵动。", elder: "这个字有山有气，稳而不钝，清雅但不生硬。" },
+        { c: "澄", e: "水", g: "neutral", heat: 30, trend: 84, tags: ["clean", "water"], meaning: "清澈、明净、判断清楚", allusion: "澄有澄明、澄澈之意，适合表达心地清明和思维清楚。", elder: "希望孩子心里清楚，做人干净，不只是字形带水。" },
+        { c: "砚", e: "土", g: "neutral", heat: 19, trend: 81, tags: ["classic", "study"], meaning: "文气、沉静、可解释性强", allusion: "砚是文房之物，代表耐心、学养和长期积累。", elder: "这个字有读书人的沉静，不俗气，也不是怪字。" },
+        { c: "珩", e: "金", g: "neutral", heat: 35, trend: 70, tags: ["classic", "jade"], meaning: "玉饰之名，珍重而不张扬", allusion: "珩为古代佩玉，文化感强，但需要注意认读门槛。", elder: "寓意珍重端正，但如果担心别人不认识，可以作为备选。" },
+        { c: "舟", e: "水", g: "boy", heat: 23, trend: 82, tags: ["nature", "modern", "water"], meaning: "远行、承载、方向感", allusion: "舟有载人渡水之意，适合表达承担与远行。", elder: "这个字有方向和承载，不是漂泊，而是能渡人渡己。" },
+        { c: "栖", e: "木", g: "girl", heat: 40, trend: 66, tags: ["nature", "soft"], meaning: "有所安放，诗意但略偏网感", allusion: "栖有安居、停驻之意，意境好，但近年审美热度上升。", elder: "意思是有所安放，但要注意不要和网红清冷风太接近。" },
+        { c: "曜", e: "火", g: "boy", heat: 28, trend: 73, tags: ["modern", "light"], meaning: "明亮、有能量，需注意不过度张扬", allusion: "曜有光耀之意，表达明亮与行动力。", elder: "这个字有光，但略强势，适合搭配克制的字。" },
+        { c: "若", e: "木", g: "girl", heat: 46, trend: 75, tags: ["classic", "soft"], meaning: "柔和、文雅、留白感", allusion: "若有如、似、从容之意，古典名字中常见但不粗俗。", elder: "柔和文气，适合不想太强势的名字。" },
+        { c: "承", e: "金", g: "boy", heat: 31, trend: 83, tags: ["classic", "stable"], meaning: "承担、承接、家庭解释友好", allusion: "承有承载、承诺、承继之意，适合表达责任感。", elder: "既能承家风，也能承担自己的路，解释很稳。" },
+        { c: "望", e: "水", g: "neutral", heat: 22, trend: 84, tags: ["modern", "vast", "water"], meaning: "远望、希望、格局感", allusion: "望有远望与期待之意，比直接许愿更含蓄。", elder: "不是望子成龙的压力，而是希望孩子眼界更远。" },
+        { c: "棠", e: "木", g: "girl", heat: 37, trend: 78, tags: ["nature", "classic", "soft"], meaning: "海棠意象，温润而有辨识度", allusion: "海棠是传统审美里的温润花木，气质柔但不弱。", elder: "这个字有花木之美，也有中国审美的底子。" },
+        { c: "霁", e: "水", g: "neutral", heat: 18, trend: 80, tags: ["clean", "water", "sky"], meaning: "雨雪初晴，困难之后见明朗", allusion: "霁指雨雪停止、天空转晴，文化意象很完整。", elder: "寓意风雨过后见晴朗，比单纯带水更有故事。" },
+        { c: "沅", e: "水", g: "neutral", heat: 26, trend: 75, tags: ["water", "classic"], meaning: "水名，温润而不俗", allusion: "沅为水名，楚地文化联想较强，适合水意象但不落俗。", elder: "有水的根，又不是常见爆款字，气质温和。" },
+        { c: "晏", e: "火", g: "neutral", heat: 24, trend: 82, tags: ["clean", "classic", "stable"], meaning: "安和、明朗、从容", allusion: "晏有天清、安定之意，适合表达清明而安稳。", elder: "既有日光，也有安定，不张扬。" },
+        { c: "昭", e: "火", g: "neutral", heat: 29, trend: 79, tags: ["light", "classic"], meaning: "明白、光明、坦荡", allusion: "昭有昭明、昭然之意，表达坦荡和清楚。", elder: "希望孩子心地亮堂，做事明白。" },
+        { c: "怀", e: "水", g: "boy", heat: 28, trend: 81, tags: ["classic", "soft", "water"], meaning: "胸怀、念想、包容", allusion: "怀可联想到怀瑾握瑜，强调内在珍贵与胸怀。", elder: "有胸怀，也有念恩之意，厚道。" },
+        { c: "庭", e: "土", g: "neutral", heat: 25, trend: 79, tags: ["classic", "stable"], meaning: "家风、秩序、安放", allusion: "庭有庭院、门庭之意，表达家风和安放感。", elder: "这个字和家庭根基有关，稳妥好解释。" },
+        { c: "远", e: "土", g: "boy", heat: 34, trend: 83, tags: ["modern", "vast"], meaning: "长远、眼界、格局", allusion: "远可联想到宁静致远，重在长期视野。", elder: "希望孩子看得远，不只追眼前。" },
+        { c: "绥", e: "水", g: "neutral", heat: 12, trend: 72, tags: ["classic", "stable", "water"], meaning: "安抚、安定、平顺", allusion: "绥有安定、平和之意，文化感强但认读门槛略高。", elder: "寓意平安顺遂，但字较少见，需要谨慎。" },
+        { c: "南", e: "火", g: "neutral", heat: 32, trend: 82, tags: ["modern", "warm"], meaning: "温暖、方向、开阔", allusion: "南有方向感和温暖感，适合搭配冷静字。", elder: "名字有方向和温度，不会太冷。" },
+        { c: "闻", e: "水", g: "neutral", heat: 21, trend: 80, tags: ["classic", "study"], meaning: "见闻、声名、学习", allusion: "闻有见闻、闻达之意，强调学识和格局。", elder: "希望孩子有见识，但不急于成名。" },
+      ];
+
+      const hotChars = new Set(["梓", "涵", "宸", "辰", "轩", "泽", "沐", "诺", "宇", "浩", "妍", "汐", "桐", "萱", "睿"]);
+      const hotCombos = new Set(["梓涵", "子轩", "浩宇", "宇轩", "沐宸", "一诺", "依诺", "欣怡", "语桐", "雨桐", "梓萱", "梓豪", "浩然", "奕辰"]);
+      const commonSurnames = new Map([
+        ["王", 96], ["李", 95], ["张", 94], ["刘", 90], ["陈", 88], ["杨", 82],
+        ["黄", 78], ["赵", 76], ["吴", 75], ["周", 72], ["徐", 68], ["孙", 66],
+      ]);
+
+      const elementNames = {
+        "水": "水：流动、智慧、包容",
+        "木": "木：生长、仁厚、舒展",
+        "火": "火：明亮、表达、行动",
+        "土": "土：稳定、承托、秩序",
+        "金": "金：规则、清正、判断",
+      };
+
+      const form = document.querySelector("#namingForm");
+      const submitButton = form.querySelector("button[type='submit']");
+      const submitLabel = submitButton.querySelector(".button-label");
+      const chips = document.querySelector("#imageChips");
+      const cards = document.querySelector("#cards");
+      const output = document.querySelector("#output");
+      const strategy = document.querySelector("#strategy");
+      const metaphysicsPanel = document.querySelector("#metaphysicsPanel");
+      const shuffleImagesButton = document.querySelector("#shuffleImages");
+      const peopleGrid = document.querySelector("#peopleGrid");
+      const selectedPeopleNote = document.querySelector("#selectedPeopleNote");
+      const toast = document.querySelector("#toast");
+      const scorePanel = document.querySelector("#scorePanel");
+      let currentInput = null;
+      let candidateDeck = [];
+      let displayedCandidates = [];
+      let selectedPeople = [];
+      let expandedPeople = new Set();
+      let selectedImageKeys = new Set();
+      let refreshCounts = {};
+      let toastTimer = null;
+      let shouldAnimateResults = false;
+
+      function updateFlowState(stage = "input") {
+        const hasBaseInput = document.querySelector("#surname").value.trim()
+          && document.querySelector("#birth").value
+          && document.querySelector("#city").value.trim();
+        const hasTaste = selectedImageKeys.size > 0 || selectedPeople.length > 0;
+        document.querySelectorAll("[data-flow-step]").forEach((item) => {
+          const step = item.dataset.flowStep;
+          item.classList.remove("is-active", "is-done");
+          if (step === "input") {
+            item.classList.toggle("is-done", Boolean(hasBaseInput));
+            item.classList.toggle("is-active", !hasBaseInput);
+          }
+          if (step === "taste") {
+            item.classList.toggle("is-done", hasTaste);
+            item.classList.toggle("is-active", Boolean(hasBaseInput && !hasTaste));
+          }
+          if (step === "result") {
+            item.classList.toggle("is-done", output.classList.contains("has-results"));
+            item.classList.toggle("is-active", stage === "result");
+          }
+        });
+      }
+
+      function markResultsEntered() {
+        cards.classList.remove("just-generated");
+        window.requestAnimationFrame(() => {
+          cards.classList.add("just-generated");
+          window.setTimeout(() => cards.classList.remove("just-generated"), 420);
+        });
+      }
+
+      function shuffle(list) {
+        const copy = [...list];
+        for (let index = copy.length - 1; index > 0; index -= 1) {
+          const swapIndex = Math.floor(Math.random() * (index + 1));
+          [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+        }
+        return copy;
+      }
+
+      function renderImageChips() {
+        chips.innerHTML = "";
+        const selectedOptions = imageOptions.filter((option) => selectedImageKeys.has(option.key));
+        const restOptions = shuffle(imageOptions.filter((option) => !selectedImageKeys.has(option.key))).slice(0, Math.max(0, 10 - selectedOptions.length));
+        [...selectedOptions, ...restOptions].forEach((option, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "chip";
+          button.textContent = option.label;
+          button.dataset.key = option.key;
+          button.title = option.tone;
+          const pressed = selectedImageKeys.has(option.key);
+          button.setAttribute("aria-pressed", String(pressed));
+          button.addEventListener("click", () => {
+            if (selectedImageKeys.has(option.key)) {
+              selectedImageKeys.delete(option.key);
+            } else if (selectedImageKeys.size < 5) {
+              selectedImageKeys.add(option.key);
+            } else {
+              button.title = "最多选择 5 个偏好意象";
+            }
+            renderImageChips();
+            updateFlowState();
+            regenerateFromCurrentInput();
+          });
+          chips.append(button);
+        });
+      }
+
+      shuffleImagesButton.addEventListener("click", () => {
+        renderImageChips();
+        updateFlowState();
+      });
+
+      function showToast(message) {
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add("is-visible");
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => {
+          toast.classList.remove("is-visible");
+        }, 1800);
+      }
+
+      function closeScorePanel() {
+        if (!scorePanel) return;
+        scorePanel.classList.remove("is-visible");
+        scorePanel.setAttribute("aria-hidden", "true");
+        document.querySelectorAll("[data-score][aria-expanded='true']").forEach((button) => {
+          button.setAttribute("aria-expanded", "false");
+        });
+      }
+
+      function openScorePanel(button) {
+        if (!scorePanel) return;
+        const values = button.dataset.scoreValues.split("|").map((value) => Number(value));
+        const labels = ["命理", "重名", "音律", "寓意", "趋势", "书写"];
+        closeScorePanel();
+        scorePanel.innerHTML = `
+          <div class="score-panel-title">
+            <strong>评分细项</strong>
+            <span>综合分 ${button.dataset.total}</span>
+          </div>
+          <div class="score-panel-grid">
+            ${labels.map((label, index) => `
+              <div class="score-panel-item">
+                <span>${label}</span>
+                <strong>${values[index]}</strong>
+              </div>
+            `).join("")}
+          </div>
+        `;
+        scorePanel.classList.add("is-visible");
+        scorePanel.setAttribute("aria-hidden", "false");
+        button.setAttribute("aria-expanded", "true");
+
+        const rect = button.getBoundingClientRect();
+        const panelWidth = scorePanel.offsetWidth;
+        const panelHeight = scorePanel.offsetHeight;
+        const margin = 16;
+        const left = Math.min(window.innerWidth - panelWidth - margin, Math.max(margin, rect.right - panelWidth));
+        const spaceBelow = window.innerHeight - rect.bottom - margin;
+        const top = spaceBelow >= panelHeight + 10
+          ? rect.bottom + 10
+          : Math.max(margin, rect.top - panelHeight - 10);
+        scorePanel.style.left = `${left}px`;
+        scorePanel.style.top = `${top}px`;
+        scorePanel.style.transformOrigin = top < rect.top ? "bottom right" : "top right";
+      }
+
+      function splitChars(value) {
+        return [...new Set(String(value || "").replace(/[,\s，、]/g, "").split("").filter(Boolean))];
+      }
+
+      function clampScore(value) {
+        return Math.max(0, Math.min(100, Math.round(value)));
+      }
+
+      function inferElement(birthValue, city) {
+        const date = birthValue ? new Date(birthValue) : new Date();
+        const month = date.getMonth() + 1;
+        const hour = date.getHours();
+        const cityHint = String(city || "");
+        if ([11, 12, 1].includes(month) || cityHint.includes("海") || cityHint.includes("深")) return "火";
+        if ([3, 4, 5].includes(month)) return "金";
+        if ([6, 7, 8].includes(month) || hour >= 11 && hour <= 15) return "水";
+        if ([9, 10].includes(month)) return "木";
+        return "土";
+      }
+
+      function scoreSound(name) {
+        const uniqueCount = new Set(name).size;
+        const repeatPenalty = uniqueCount < name.length ? 16 : 0;
+        const densePenalty = [...name].some((char) => ["曜", "珩", "砚", "霁", "绥"].includes(char)) ? 7 : 0;
+        const balanceBonus = name.length === 3 ? 3 : 0;
+        const surnamePenalty = name[0] === name[1] ? 10 : 0;
+        return Math.max(55, Math.min(96, 87 + balanceBonus - repeatPenalty - densePenalty - surnamePenalty));
+      }
+
+      function scoreRarity(surname, given) {
+        const surnameRisk = commonSurnames.get(surname) || 38;
+        const charRisk = [...given].reduce((sum, char) => sum + (hotChars.has(char) ? 26 : 0), 0);
+        const comboRisk = hotCombos.has(given) ? 38 : 0;
+        const patternRisk = (/沐[宸辰泽阳]|语[汐桐涵]|梓[萱涵睿豪]/.test(given) ? 26 : 0);
+        const totalRisk = Math.min(100, surnameRisk * 0.28 + charRisk + comboRisk + patternRisk);
+        return Math.max(18, Math.round(100 - totalRisk));
+      }
+
+      function visualWeight(char) {
+        if ("一二三十丁予子川山小夕月舟宁云南".includes(char)) return 1;
+        if ("安知言禾若远承望晏昭怀庭闻".includes(char)) return 2;
+        if ("清衡岚棠沅栖珩砚".includes(char)) return 3;
+        if ("澄曜霁绥".includes(char)) return 4;
+        return 3;
+      }
+
+      function scoreWriting(fullName, given) {
+        const weights = [...fullName].map(visualWeight);
+        const max = Math.max(...weights);
+        const min = Math.min(...weights);
+        const complexity = weights.reduce((sum, value) => sum + value, 0);
+        const balance = clampScore(94 - (max - min) * 8 - Math.max(0, complexity - 9) * 3);
+        const difficulty = clampScore(96 - complexity * 4);
+        const flow = clampScore(72 + [...given].filter((char) => "予川月舟云安宁南远".includes(char)).length * 8 - [...given].filter((char) => "澄曜霁绥衡珩".includes(char)).length * 6);
+        const recognition = clampScore(88 - [...given].filter((char) => "绥珩曜霁".includes(char)).length * 10 + [...given].filter((char) => "安宁川舟清知言".includes(char)).length * 3);
+        const total = clampScore(balance * 0.3 + difficulty * 0.25 + flow * 0.25 + recognition * 0.2);
+        return { total, balance, difficulty, flow, recognition };
+      }
+
+      function nameTags(candidate) {
+        if (candidate.aiTags?.length) {
+          return [...new Set([candidate.category, ...candidate.aiTags])].slice(0, 5);
+        }
+        const tags = [candidate.category];
+        const partTags = new Set(candidate.parts.flatMap((part) => part.tags));
+        if (candidate.rarity >= 74) tags.push("低重名");
+        if (candidate.meaning >= 86) tags.push("涵养完整");
+        if (candidate.writing.total >= 78) tags.push("好写好认");
+        if (partTags.has("classic") || partTags.has("study")) tags.push("书卷气");
+        if (partTags.has("water")) tags.push("水意象");
+        if (partTags.has("stable")) tags.push("家风稳");
+        if (partTags.has("nature")) tags.push("自然感");
+        if (partTags.has("vast")) tags.push("有格局");
+        return [...new Set(tags)].slice(0, 5);
+      }
+
+      function selectInitialCandidates(deck) {
+        const buckets = new Map();
+        deck.forEach((candidate) => {
+          if (!buckets.has(candidate.category)) buckets.set(candidate.category, []);
+          buckets.get(candidate.category).push(candidate);
+        });
+        const selected = [];
+        [...buckets.values()].forEach((list) => selected.push(...list.slice(0, 3)));
+        return selected.slice(0, 12);
+      }
+
+      function refreshCandidate(slotIndex) {
+        const current = displayedCandidates[slotIndex];
+        if (!current) return;
+        if ((refreshCounts[slotIndex] || 0) >= 2) {
+          showToast("这个候选位已用完 2 次刷新机会");
+          return;
+        }
+        const visibleNames = new Set(displayedCandidates.map((candidate) => candidate.fullName));
+        const visibleKeys = new Set(displayedCandidates.map((candidate) => candidate.comboKey));
+        const alternatives = candidateDeck.filter((candidate) =>
+          candidate.category === current.category && !visibleNames.has(candidate.fullName) && !visibleKeys.has(candidate.comboKey)
+        );
+        const fallback = candidateDeck.filter((candidate) => !visibleNames.has(candidate.fullName) && !visibleKeys.has(candidate.comboKey));
+        const pool = alternatives.length ? alternatives : fallback;
+        if (!pool.length) {
+          showToast("暂时没有更多同类候选");
+          return;
+        }
+        displayedCandidates[slotIndex] = pool[Math.floor(Math.random() * pool.length)];
+        refreshCounts[slotIndex] = (refreshCounts[slotIndex] || 0) + 1;
+        const remaining = Math.max(0, 2 - refreshCounts[slotIndex]);
+        render(currentInput, displayedCandidates);
+        showToast(remaining ? `已换一个候选，还剩 ${remaining} 次` : "已换一个候选，这个位置已无刷新次数");
+      }
+
+      function selectedPeopleKeywords() {
+        return new Set(selectedPeople.flatMap((person) => person.keywords || []));
+      }
+
+      function selectedPeopleNames() {
+        return selectedPeople.map((person) => person.name).join("、");
+      }
+
+      function charMatchesPeople(part, peopleKeywords) {
+        const text = `${part.meaning || ""}${part.allusion || ""}${part.elder || ""}${part.tags.join("")}`;
+        const map = [
+          ["求真", /知|明|衡|闻|清|truth|study|classic/],
+          ["明辨", /知|明|衡|闻|清/],
+          ["探索", /远|望|川|舟|知|vast|water/],
+          ["仁心", /安|怀|清|宁|soft|water/],
+          ["济世", /安|怀|清|舟|承/],
+          ["守护", /安|宁|庭|承|stable/],
+          ["创造", /昭|承|远|舟|light|modern/],
+          ["结构", /衡|庭|承|砚|stable/],
+          ["开拓", /远|望|川|舟|vast/],
+          ["文心", /言|砚|闻|知|study|classic/],
+          ["表达", /言|闻|昭|知|study/],
+          ["见识", /闻|知|望|远/],
+          ["审美", /清|岚|棠|霁|jade|classic/],
+          ["灵感", /昭|清|岚|棠|light/],
+          ["远见", /远|望|衡|知|vast/],
+          ["坚韧", /衡|承|松|宁|stable/],
+          ["自律", /衡|宁|承|安|stable/],
+          ["突破", /昭|远|川|舟|light/],
+          ["公共精神", /怀|安|承|宁/],
+        ];
+        return map.some(([keyword, pattern]) => peopleKeywords.has(keyword) && pattern.test(text));
+      }
+
+      function classicHint(part) {
+        const hints = {
+          "知": "《道德经》有“知人者智，自知者明”，适合解释为明辨和自知。",
+          "远": "诸葛亮《诫子书》有“非宁静无以致远”，适合解释为长期视野。",
+          "安": "“安身立命”常用于表达安定根基，也可延展为内心有定力。",
+          "清": "“清风”“清明”“清正”都偏向品格干净和思路清楚。",
+          "衡": "“权衡”强调判断和分寸，适合作为稳重理性的价值表达。",
+          "宁": "“宁静致远”强调安静中的长远力量。",
+          "川": "“百川归海”表达开阔、包容和汇聚。",
+          "舟": "舟有承载与渡行之义，适合解释为能渡己也能承人。",
+          "砚": "砚属文房之物，代表学养、耐心和长期积累。",
+          "霁": "霁为雨雪止而天晴，适合表达风雨后明朗。",
+          "怀": "“怀瑾握瑜”常用来形容内在珍贵和品格。",
+          "棠": "海棠是传统花木意象，温润但不软弱。",
+          "闻": "闻有见闻、闻达之意，适合解释为见识和学习。",
+        };
+        return hints[part.c] || part.allusion || part.meaning;
+      }
+
+      function buildCandidates(input) {
+        const required = splitChars(input.requiredChars);
+        const blocked = new Set(splitChars(input.blockedChars));
+        const selected = imageOptions.filter((option) => selectedImageKeys.has(option.key));
+        const selectedTags = new Set(selected.flatMap((option) => option.tags));
+        const preferredElements = new Set(selected.flatMap((option) => option.elements));
+        const peopleKeywords = selectedPeopleKeywords();
+        preferredElements.add(input.neededElement);
+
+        const customChars = required
+          .filter((char) => !chars.some((item) => item.c === char))
+          .map((char) => ({
+            c: char,
+            e: input.neededElement,
+            g: "neutral",
+            heat: hotChars.has(char) ? 62 : 44,
+            trend: hotChars.has(char) ? 58 : 72,
+            tags: [input.style],
+            meaning: "家长指定字，需要结合官方查重和家庭解释进一步确认",
+            custom: true,
+          }));
+
+        const pool = [...chars, ...customChars].filter((item) => {
+          if (blocked.has(item.c) && !required.includes(item.c)) return false;
+          if (input.gender !== "neutral" && item.g !== "neutral" && item.g !== input.gender) return false;
+          return true;
+        });
+
+        const pairs = [];
+        if (Number(input.nameLength) === 1) {
+          pool.forEach((a) => pairs.push([a]));
+        } else {
+          pool.forEach((a) => {
+            pool.forEach((b) => {
+              if (a.c !== b.c) pairs.push([a, b]);
+            });
+          });
+        }
+
+        const filtered = pairs.filter((parts) => {
+          const given = parts.map((part) => part.c).join("");
+          return required.every((char) => given.includes(char));
+        });
+
+        const scored = filtered.map((parts) => {
+          const given = parts.map((part) => part.c).join("");
+          const comboKey = [...given].sort().join("");
+          const fullName = `${input.surname}${given}`;
+          const elementHits = parts.filter((part) => preferredElements.has(part.e)).length;
+          const tagHits = parts.reduce((sum, part) => sum + part.tags.filter((tag) => selectedTags.has(tag)).length, 0);
+          const destiny = clampScore(58 + elementHits * 15 + Math.min(12, tagHits * 3) + (parts.some((part) => part.e === input.neededElement) ? 8 : 0));
+          const rarity = scoreRarity(input.surname, given);
+          const sound = scoreSound(fullName);
+          const meaning = clampScore(parts.reduce((sum, part) => {
+            const styleHit = part.tags.includes(input.style) ? 12 : 0;
+            const wishHit = input.wishes.includes(part.c) || part.tags.some((tag) => input.wishes.includes(tag)) ? 7 : 0;
+            const imageHit = part.tags.some((tag) => selectedTags.has(tag)) ? 8 : 0;
+            const allusionHit = part.allusion ? 6 : 0;
+            const peopleHit = charMatchesPeople(part, peopleKeywords) ? 8 : 0;
+            return sum + 64 + styleHit + wishHit + imageHit + allusionHit + peopleHit;
+          }, 0) / parts.length);
+          const trend = clampScore(parts.reduce((sum, part) => sum + part.trend - (hotChars.has(part.c) ? 10 : 0), 0) / parts.length);
+          const writing = scoreWriting(fullName, given);
+          const duplicateElementPenalty = parts.length > 1 && parts.every((part) => part.e === parts[0].e) ? 6 : 0;
+          const sameThemePenalty = parts.length > 1 && parts[0].tags.some((tag) => parts[1].tags.includes(tag)) ? 3 : 0;
+          const hotPenalty = [...given].filter((char) => hotChars.has(char)).length * 5;
+          const customPenalty = parts.some((part) => part.custom) ? 4 : 0;
+          const riskPenalty = duplicateElementPenalty + sameThemePenalty + hotPenalty + customPenalty;
+          const rawTotal = destiny * DEFAULT_WEIGHTS.destiny + rarity * DEFAULT_WEIGHTS.rarity + sound * DEFAULT_WEIGHTS.sound + meaning * DEFAULT_WEIGHTS.meaning + trend * DEFAULT_WEIGHTS.trend - riskPenalty;
+          const total = Math.max(62, Math.min(96, Math.round(rawTotal)));
+          const category = required.some((char) => given.includes(char))
+            ? "家长指定字优先"
+            : rarity >= 74
+              ? "低重名探索"
+              : selectedTags.has("nature") || selectedTags.has("water") || selectedTags.has("wood")
+                ? "清朗自然"
+                : "稳妥经典";
+          return { fullName, given, comboKey, parts, destiny, rarity, sound, meaning, trend, writing, total, category, riskPenalty };
+        }).sort((a, b) => b.total - a.total);
+
+        const usedChars = new Map();
+        const usedCombos = new Set();
+        const diverse = [];
+        for (const candidate of scored) {
+          const overused = [...candidate.given].some((char) => !required.includes(char) && (usedChars.get(char) || 0) >= 2);
+          if (usedCombos.has(candidate.comboKey)) continue;
+          if (overused) continue;
+          diverse.push(candidate);
+          usedCombos.add(candidate.comboKey);
+          [...candidate.given].forEach((char) => usedChars.set(char, (usedChars.get(char) || 0) + 1));
+          if (diverse.length >= 36) break;
+        }
+        return diverse;
+      }
+
+      function reasonsFor(candidate, input) {
+        if (candidate.aiReasons?.length) {
+          return candidate.aiReasons.slice(0, 3).map((reason) => {
+            const text = String(reason);
+            return /<strong>/.test(text) ? text : `<strong>AI 依据：</strong>${text}`;
+          });
+        }
+        const reasons = [];
+        const elements = candidate.parts.map((part) => part.e).join(" / ");
+        const peopleKeywords = selectedPeopleKeywords();
+        reasons.push(`<strong>五行取向：</strong>名字含 ${elements}。这里用字义和意象回应 ${input.neededElement}，不机械堆偏旁。`);
+        reasons.push(`<strong>寓意：</strong>${candidate.parts.map((part) => `${part.c}：${part.meaning}`).join("；")}。`);
+        reasons.push(`<strong>典故/文化联想：</strong>${candidate.parts.map(classicHint).join("；")}`);
+        const hot = [...candidate.given].filter((char) => hotChars.has(char));
+        if (hot.length) {
+          reasons.push(`<strong>重名提醒：</strong>${hot.join("、")} 属于近年高频或网红感较强的字，需要官方查重复核。`);
+        } else {
+          reasons.push("<strong>重名提醒：</strong>未命中内置高频爆款字，组合拥挤度较低。");
+        }
+        if (commonSurnames.has(input.surname)) {
+          reasons.push(`<strong>姓氏影响：</strong>${input.surname} 是高频姓氏，最终必须用官方同名人数复核。`);
+        }
+        if (selectedPeople.length) {
+          const matched = candidate.parts.filter((part) => charMatchesPeople(part, peopleKeywords)).map((part) => part.c);
+          const keywordText = [...peopleKeywords].slice(0, 5).join("、");
+          reasons.push(`<strong>人物灵感：</strong>已参考 ${selectedPeopleNames()} 的关键词 ${keywordText}${matched.length ? `，其中 ${matched.join("、")} 与这些价值观更接近` : ""}。`);
+        }
+        reasons.push(`<strong>给长辈的解释：</strong>${candidate.parts.map((part) => part.elder || part.meaning).join("；")}`);
+        return reasons.slice(0, 3);
+      }
+
+      function selectedPreferencePayload() {
+        return imageOptions.filter((option) => selectedImageKeys.has(option.key)).map((option) => ({
+          label: option.label,
+          tone: option.tone,
+          elements: option.elements,
+        }));
+      }
+
+      function selectedPeoplePayload() {
+        return selectedPeople.map((person) => ({
+          name: person.name,
+          field: person.field,
+          contribution: person.contribution,
+          namingHint: person.namingHint,
+          keywords: person.keywords || [],
+        }));
+      }
+
+      function compactText(value, fallback, maxLength = 44) {
+        const text = String(value || fallback || "").trim();
+        return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+      }
+
+      function renderMetaphysicsPanel(input) {
+        const analysis = input.aiAnalysis || {};
+        const bazi = input.aiBazi || {};
+        const pillars = bazi.pillars ? Object.values(bazi.pillars).join(" ") : "";
+        const useful = Array.isArray(bazi.usefulElements) ? bazi.usefulElements.join("、") : "";
+        const scoreText = bazi.elementScores
+          ? Object.entries(bazi.elementScores).map(([key, value]) => `${key}${value}`).join(" ")
+          : "";
+        const destinyText = analysis.destiny || (pillars ? `四柱 ${pillars}，喜用倾向 ${useful || input.neededElement}` : `当前先按出生信息推得偏向补 ${input.neededElement}`);
+        const baziText = analysis.baziNote || (bazi.dayMaster ? `日主${bazi.dayMaster.stem}${bazi.dayMaster.element}，强弱：${bazi.dayMaster.strength}` : "八字取名应看日主、月令、五行强弱和喜用方向，不机械缺啥补啥。");
+        const wugeText = analysis.wugeNote || "五格数理使用康熙笔画口径时，只作为民俗姓名学辅助，不作为唯一判断。";
+        const methodText = analysis.method || (scoreText ? `五行分布：${scoreText}` : "本次综合五行意象、字义典故、重名风险、音律书写和趋势稳定性生成候选。");
+        const caveatText = analysis.caveat || bazi.caveat || "命理和姓名学属于传统文化参考，不构成确定性命运判断。";
+        metaphysicsPanel.innerHTML = `
+          <h2>命理与姓名学依据</h2>
+          <div class="insight-list">
+            <div><span>命理取向</span><p>${compactText(destinyText, "", 58)}</p></div>
+            <div><span>八字原则</span><p>${compactText(baziText, "", 58)}</p></div>
+            <div><span>五格数理</span><p>${compactText(wugeText, "", 54)}</p></div>
+            <div><span>生成方法</span><p>${compactText(methodText, "", 58)}</p></div>
+            <div><span>边界声明</span><p>${compactText(caveatText, "", 54)}</p></div>
+          </div>
+        `;
+      }
+
+      function localCandidatesForInput(input) {
+        const deck = buildCandidates(input);
+        return { deck, displayed: selectInitialCandidates(deck) };
+      }
+
+      async function requestAiCandidates(input) {
+        if (window.location.protocol === "file:") {
+          throw new Error("当前用 file:// 打开页面，AI 接口需要通过 http://127.0.0.1:3000/name-mvp.html 访问。");
+        }
+
+        const response = await fetch("/api/generate-name", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...input,
+            preferences: selectedPreferencePayload(),
+            people: selectedPeoplePayload(),
+          }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.ok) {
+          const error = new Error(result.message || "AI 生成失败，已回退本地规则。");
+          error.bazi = result.bazi || null;
+          throw error;
+        }
+        if (!Array.isArray(result.candidates) || !result.candidates.length) {
+          throw new Error("AI 未返回可用候选名，已回退本地规则。");
+        }
+        input.aiAnalysis = result.analysis || {};
+        input.aiBazi = result.bazi || null;
+        if (result.bazi?.usefulElements?.[0]) {
+          input.neededElement = result.bazi.usefulElements[0];
+        }
+        return result;
+      }
+
+      function dateKeyFromBirth(birthValue) {
+        const date = birthValue ? new Date(birthValue) : new Date();
+        return `${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+      }
+
+      function peopleForInput(input) {
+        const key = dateKeyFromBirth(input?.birth);
+        const source = window.NAME_PERSON_INSIGHTS || {};
+        const list = source[key] || [];
+        if (!list.length) return [];
+        return list.slice(0, 4);
+      }
+
+      function regenerateFromCurrentInput() {
+        if (!currentInput) return;
+        refreshCounts = {};
+        candidateDeck = buildCandidates(currentInput);
+        displayedCandidates = selectInitialCandidates(candidateDeck);
+        shouldAnimateResults = true;
+        render(currentInput, displayedCandidates);
+      }
+
+      function togglePerson(person) {
+        const exists = selectedPeople.some((item) => item.name === person.name);
+        if (exists) {
+          selectedPeople = selectedPeople.filter((item) => item.name !== person.name);
+        } else {
+          selectedPeople = [...selectedPeople, person].slice(-2);
+        }
+        updateFlowState();
+        regenerateFromCurrentInput();
+      }
+
+      function renderPeople(input) {
+        const people = peopleForInput(input);
+        if (!people.length) {
+          peopleGrid.innerHTML = `<div class="empty">人物灵感库未加载。请确认 name-person-insights.js 与页面在同一目录。</div>`;
+          return;
+        }
+        peopleGrid.innerHTML = people.map((person) => `
+          <article class="person-card" aria-pressed="${selectedPeople.some((item) => item.name === person.name)}" aria-expanded="${expandedPeople.has(person.name)}">
+            <div class="person-title">
+              <button class="person-check" type="button" aria-label="选择 ${person.name}" data-person-select="${person.name}">✓</button>
+              <div>
+                <h3>${person.name}</h3>
+                <div class="person-meta">${person.region}｜${person.field}｜${person.date}</div>
+              </div>
+            </div>
+            <div class="person-keywords">${(person.keywords || []).map((keyword) => `<span>${keyword}</span>`).join("")}</div>
+            <div class="person-detail">
+              <p>${person.contribution}</p>
+              <p><strong>命名启发：</strong>${person.namingHint}</p>
+            </div>
+            <button class="person-expand" type="button" data-person-expand="${person.name}">${expandedPeople.has(person.name) ? "收起详情" : "展开典故"}</button>
+          </article>
+        `).join("");
+        selectedPeopleNote.textContent = selectedPeople.length
+          ? `已选择：${selectedPeopleNames()}`
+          : "可选择 1-2 位人物作为价值观灵感";
+        peopleGrid.querySelectorAll("[data-person-select]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const person = people.find((item) => item.name === button.dataset.personSelect);
+            if (!person) return;
+            togglePerson(person);
+          });
+        });
+        peopleGrid.querySelectorAll("[data-person-expand]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const name = button.dataset.personExpand;
+            if (expandedPeople.has(name)) expandedPeople.delete(name);
+            else expandedPeople.add(name);
+            renderPeople(input);
+          });
+        });
+      }
+
+      function render(input, candidates) {
+        closeScorePanel();
+        output.classList.add("has-results");
+        const selectedLabels = imageOptions.filter((option) => selectedImageKeys.has(option.key)).map((option) => option.label);
+        const topNames = candidates.slice(0, 3).map((candidate) => candidate.fullName).join("、") || "待生成";
+        strategy.innerHTML = `
+          <div class="strategy-item"><span>命理方向</span><strong>补 ${input.neededElement}</strong></div>
+          <div class="strategy-item"><span>家庭偏好</span><strong>${selectedLabels.slice(0, 4).join("、") || "未选择"}</strong></div>
+          <div class="strategy-item"><span>决策动作</span><strong>复制姓名后官方查重</strong></div>
+        `;
+        renderMetaphysicsPanel(input);
+        renderPeople(input);
+        updateFlowState("result");
+
+        if (!candidates.length) {
+          cards.innerHTML = `<div class="empty">没有生成候选名。请减少必须包含字，或放宽排除字与性别限制。</div>`;
+          return;
+        }
+
+        const grouped = candidates.reduce((map, candidate) => {
+          if (!map.has(candidate.category)) map.set(candidate.category, []);
+          map.get(candidate.category).push(candidate);
+          return map;
+        }, new Map());
+
+        const brief = `
+          <section class="result-brief">
+            <div class="brief-lead">
+              <span>本次命名结论</span>
+              <h2>${topNames}</h2>
+              <p>先按命理喜用、家庭意象和重名风险筛出少量候选，再去官方平台复核同名人数。</p>
+            </div>
+            <div class="brief-list">
+              <div><span>命理主线</span><p>${elementNames[input.neededElement] || input.neededElement}</p></div>
+              <div><span>家庭意象</span><p>${selectedLabels.slice(0, 3).join("、") || "未选择"}</p></div>
+              <div><span>避险重点</span><p>避开爆款字、热门组合和正反凑名</p></div>
+              <div><span>下一步</span><p>保留 3-5 个候选，去公安平台查重</p></div>
+            </div>
+          </section>
+        `;
+
+        const overview = `
+          <section class="candidate-overview">
+            <div class="candidate-overview-head">
+              <h3>本次候选名速览</h3>
+              <a class="secondary overview-official" href="https://ywtb.mps.gov.cn/" target="_blank" rel="noopener noreferrer">去公安查重</a>
+            </div>
+            <div class="candidate-rail">
+              ${candidates.map((candidate) => `<button class="candidate-pill" type="button" data-copy-name="${candidate.fullName}" title="复制 ${candidate.fullName}">${candidate.fullName}</button>`).join("")}
+            </div>
+          </section>
+        `;
+
+        cards.innerHTML = brief + overview + [...grouped.entries()].map(([category, list]) => `
+          <section class="result-group">
+            <h3>${category}</h3>
+            <div class="cards group-cards">
+              ${list.map((candidate) => {
+                const index = candidates.indexOf(candidate);
+                const tags = nameTags(candidate).map((tag) => `<span class="name-tag">${tag}</span>`).join("");
+                const reasons = reasonsFor(candidate, input).map((reason) => `<li>${reason}</li>`).join("");
+                const remainingRefreshes = Math.max(0, 2 - (refreshCounts[index] || 0));
+                return `
+                  <article class="name-card">
+                    <div class="name-top">
+                      <div>
+                        <div class="name-title">
+                          <div class="name-text">${candidate.fullName}</div>
+                          <button class="icon-button" type="button" data-refresh="${index}" title="换一个同类候选，剩 ${remainingRefreshes} 次" aria-label="换一个同类候选，剩 ${remainingRefreshes} 次" aria-disabled="${remainingRefreshes === 0}">↻</button>
+                        </div>
+                        <div class="name-tags">${tags}</div>
+                      </div>
+                      <div class="score">
+                        <button class="score-trigger" type="button" data-score="${index}" data-total="${candidate.total}" data-score-values="${[
+                          candidate.destiny,
+                          candidate.rarity,
+                          candidate.sound,
+                          candidate.meaning,
+                          candidate.trend,
+                          candidate.writing.total,
+                        ].join("|")}" aria-expanded="false">
+                          <strong>${candidate.total}</strong>
+                          <span>综合分</span>
+                        </button>
+                      </div>
+                    </div>
+                    <ul class="reason-list">${reasons}</ul>
+                  </article>
+                `;
+              }).join("")}
+            </div>
+          </section>
+        `).join("");
+        if (shouldAnimateResults) {
+          markResultsEntered();
+          shouldAnimateResults = false;
+        }
+
+        cards.querySelectorAll("[data-refresh]").forEach((button) => {
+          button.addEventListener("click", () => {
+            refreshCandidate(Number(button.dataset.refresh));
+          });
+        });
+
+        cards.querySelectorAll("[data-score]").forEach((button) => {
+          button.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const isOpen = button.getAttribute("aria-expanded") === "true";
+            if (isOpen) closeScorePanel();
+            else openScorePanel(button);
+          });
+        });
+
+        cards.querySelectorAll("[data-copy-name]").forEach((button) => {
+          button.addEventListener("click", async () => {
+            try {
+              await navigator.clipboard.writeText(button.dataset.copyName);
+            } catch (error) {
+              console.info("请手动复制候选名：", button.dataset.copyName);
+            }
+            const original = button.textContent;
+            button.textContent = "已复制";
+            setTimeout(() => {
+              button.textContent = original;
+            }, 900);
+          });
+        });
+
+      }
+
+      document.addEventListener("click", (event) => {
+        if (event.target.closest(".score-panel") || event.target.closest("[data-score]")) return;
+        closeScorePanel();
+      });
+
+      window.addEventListener("resize", closeScorePanel);
+      window.addEventListener("scroll", closeScorePanel, true);
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        currentInput = {
+          surname: document.querySelector("#surname").value.trim(),
+          gender: document.querySelector("#gender").value,
+          birth: document.querySelector("#birth").value,
+          city: document.querySelector("#city").value.trim(),
+          nameLength: document.querySelector("#nameLength").value,
+          style: document.querySelector("#style").value,
+          requiredChars: document.querySelector("#requiredChars").value,
+          blockedChars: document.querySelector("#blockedChars").value,
+          wishes: document.querySelector("#wishes").value,
+        };
+        currentInput.neededElement = inferElement(currentInput.birth, currentInput.city);
+        refreshCounts = {};
+        const originalButtonText = submitLabel.textContent;
+        submitButton.disabled = true;
+        submitButton.classList.add("is-loading");
+        submitLabel.textContent = "排盘与生成中";
+        updateFlowState("result");
+        try {
+          const aiResult = await requestAiCandidates(currentInput);
+          const local = localCandidatesForInput(currentInput);
+          candidateDeck = [...aiResult.candidates, ...local.deck];
+          displayedCandidates = aiResult.candidates.slice(0, 9);
+          shouldAnimateResults = true;
+          const dailyText = Number.isFinite(Number(aiResult.dailyRemaining)) ? `，今日余量 ${aiResult.dailyRemaining}` : "";
+          showToast(`AI 已生成候选名，个人剩余 ${aiResult.remaining} 次${dailyText}`);
+        } catch (error) {
+          if (error.bazi) {
+            currentInput.aiBazi = error.bazi;
+            if (error.bazi.usefulElements?.[0]) {
+              currentInput.neededElement = error.bazi.usefulElements[0];
+            }
+          }
+          const local = localCandidatesForInput(currentInput);
+          candidateDeck = local.deck;
+          displayedCandidates = local.displayed;
+          shouldAnimateResults = true;
+          showToast(error.message || "AI 暂不可用，已使用本地规则生成");
+        } finally {
+          submitButton.disabled = false;
+          submitButton.classList.remove("is-loading");
+          submitLabel.textContent = originalButtonText;
+        }
+        render(currentInput, displayedCandidates);
+      });
+
+      selectedImageKeys = new Set();
+      renderImageChips();
+      ["#surname", "#birth", "#city"].forEach((selector) => {
+        document.querySelector(selector).addEventListener("input", () => updateFlowState());
+      });
+      updateFlowState();
+    </script>
+  </body>
+</html>

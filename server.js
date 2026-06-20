@@ -1,16 +1,26 @@
 const http = require("http");
+const https = require("https");
+const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { loadEnv } = require("./lib/env");
 const { diagnoseFeishu, pushLeadToFeishu } = require("./lib/feishu");
+const { namingKnowledgeForPrompt } = require("./lib/naming-knowledge");
+const { buildBazi } = require("./lib/bazi-engine");
 
 loadEnv();
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || (process.env.NODE_ENV === "production" ? "0.0.0.0" : "127.0.0.1");
 const LEADS_TOKEN = process.env.LEADS_TOKEN || "";
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || "";
+const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-v4-flash";
+const AI_FREE_GENERATION_LIMIT = Number(process.env.AI_FREE_GENERATION_LIMIT || 2);
+const AI_DAILY_GLOBAL_LIMIT = Number(process.env.AI_DAILY_GLOBAL_LIMIT || 500);
+const SITE_ENTRY = process.env.SITE_ENTRY || "index.html";
 const ROOT = __dirname;
 const LEADS_FILE = path.join(ROOT, "leads.json");
+const AI_USAGE_FILE = path.join(ROOT, "name-ai-usage.json");
 
 const MIME_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -30,6 +40,12 @@ function ensureLeadsFile() {
   }
 }
 
+function ensureJsonObjectFile(filePath) {
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, "{}\n", "utf8");
+  }
+}
+
 function readLeads() {
   ensureLeadsFile();
   const raw = fs.readFileSync(LEADS_FILE, "utf8").trim();
@@ -37,8 +53,37 @@ function readLeads() {
   return JSON.parse(raw);
 }
 
+function createFileUsageStore(filePath) {
+  return {
+    read() {
+      ensureJsonObjectFile(filePath);
+      const raw = fs.readFileSync(filePath, "utf8").trim();
+      if (!raw) return {};
+      return JSON.parse(raw);
+    },
+    write(usage) {
+      fs.writeFileSync(filePath, `${JSON.stringify(usage, null, 2)}\n`, "utf8");
+    },
+  };
+}
+
+const usageStore = createFileUsageStore(AI_USAGE_FILE);
+
+function readAiUsage() {
+  return usageStore.read();
+}
+
+function writeAiUsage(usage) {
+  usageStore.write(usage);
+}
+
 function writeJson(res, statusCode, payload) {
   res.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8" });
+  res.end(JSON.stringify(payload, null, 2));
+}
+
+function writeJsonWithHeaders(res, statusCode, payload, headers = {}) {
+  res.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8", ...headers });
   res.end(JSON.stringify(payload, null, 2));
 }
 
@@ -65,6 +110,235 @@ function readRequestBody(req) {
     req.on("end", () => resolve(body));
     req.on("error", reject);
   });
+}
+
+function parseCookies(req) {
+  return String(req.headers.cookie || "")
+    .split(";")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .reduce((cookies, item) => {
+      const equalsIndex = item.indexOf("=");
+      if (equalsIndex === -1) return cookies;
+      cookies[decodeURIComponent(item.slice(0, equalsIndex))] = decodeURIComponent(item.slice(equalsIndex + 1));
+      return cookies;
+    }, {});
+}
+
+function hashValue(value) {
+  return crypto.createHash("sha256").update(String(value || "")).digest("hex");
+}
+
+function getClientIp(req) {
+  const forwarded = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+  return forwarded || req.socket.remoteAddress || "";
+}
+
+function getBrowserHash(req) {
+  const ip = getClientIp(req).replace(/:\d+$/, "");
+  const browserData = [
+    req.headers["user-agent"] || "",
+    req.headers["accept-language"] || "",
+    req.headers["sec-ch-ua"] || "",
+    ip,
+  ].join("|");
+  return hashValue(browserData);
+}
+
+function getAiUser(req, usage) {
+  const cookies = parseCookies(req);
+  const browserHash = getBrowserHash(req);
+  let userId = cookies.name_ai_uid;
+  if (!userId || !/^[a-f0-9-]{32,64}$/i.test(userId)) {
+    const matched = Object.entries(usage).find(([, record]) => record.browserHash === browserHash);
+    userId = matched ? matched[0] : crypto.randomUUID();
+  }
+  if (!usage[userId]) {
+    usage[userId] = {
+      browserHash,
+      count: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  } else {
+    usage[userId].browserHash = browserHash;
+    usage[userId].updatedAt = new Date().toISOString();
+  }
+  return { userId, record: usage[userId] };
+}
+
+function getChinaDateKey(date = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+function getDailyAiUsage(usage) {
+  const day = getChinaDateKey();
+  if (!usage.daily || usage.daily.day !== day) {
+    usage.daily = {
+      day,
+      total: 0,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+  return usage.daily;
+}
+
+function incrementDailyAiUsage(usage) {
+  const daily = getDailyAiUsage(usage);
+  daily.total = Number(daily.total || 0) + 1;
+  daily.updatedAt = new Date().toISOString();
+  usage.daily = daily;
+  return daily;
+}
+
+function makeAiUserCookie(userId) {
+  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  return `name_ai_uid=${encodeURIComponent(userId)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000${secure}`;
+}
+
+function sanitizeNameInput(input) {
+  const sanitized = {
+    surname: String(input.surname || "").trim().slice(0, 4),
+    gender: String(input.gender || "neutral").trim().slice(0, 16),
+    birth: String(input.birth || "").trim().slice(0, 40),
+    city: String(input.city || "").trim().slice(0, 40),
+    nameLength: String(input.nameLength || "2").trim() === "1" ? "1" : "2",
+    style: String(input.style || "classic").trim().slice(0, 24),
+    requiredChars: String(input.requiredChars || "").trim().slice(0, 12),
+    blockedChars: String(input.blockedChars || "").trim().slice(0, 24),
+    wishes: String(input.wishes || "").trim().slice(0, 120),
+    neededElement: String(input.neededElement || "").trim().slice(0, 16),
+    preferences: Array.isArray(input.preferences) ? input.preferences.slice(0, 5).map((item) => ({
+      label: String(item.label || "").slice(0, 12),
+      tone: String(item.tone || "").slice(0, 40),
+      elements: Array.isArray(item.elements) ? item.elements.slice(0, 3).map(String) : [],
+    })) : [],
+    people: Array.isArray(input.people) ? input.people.slice(0, 2).map((item) => ({
+      name: String(item.name || "").slice(0, 24),
+      field: String(item.field || "").slice(0, 24),
+      contribution: String(item.contribution || "").slice(0, 100),
+      namingHint: String(item.namingHint || "").slice(0, 100),
+      keywords: Array.isArray(item.keywords) ? item.keywords.slice(0, 6).map(String) : [],
+    })) : [],
+  };
+  try {
+    sanitized.bazi = buildBazi(sanitized);
+    sanitized.neededElement = sanitized.bazi.usefulElements?.[0] || sanitized.neededElement;
+  } catch (error) {
+    sanitized.baziError = error.message;
+  }
+  return sanitized;
+}
+
+function buildNamePrompt(input) {
+  return [
+    "你是一名严谨克制的中文新生儿取名顾问。你可以参考传统命理、五行、音律、典故、重名风险和家长期望，但不得宣称拥有官方同名数据库，不得做改命承诺。",
+    "请严格遵守内置知识体系：八字看喜用方向，不机械缺啥补啥；五格数理只做民俗姓名学辅助，不凌驾于现实可用性。",
+    "服务端已提供确定性排盘结果。你必须以 bazi 字段为准，不得自行改写四柱、日主、五行强弱和喜用方向；如 caveat 提示为近似算法，请如实说明。",
+    "请生成 9 个候选名。名字必须真实可用，避免生僻到难认、网红堆字、正反字序凑数、谐音风险、过度玄学。",
+    "输出必须是 JSON，不要 Markdown，不要额外解释。",
+    "JSON 结构：{\"analysis\":{\"destiny\":\"基于输入信息的命理取向说明\",\"baziNote\":\"说明当前是否为完整四柱排盘，不得编造四柱\",\"wugeNote\":\"五格数理如何作为辅助参考\",\"method\":\"本次生成如何结合五行、字义、重名、音律、五格\",\"caveat\":\"边界声明\"},\"candidates\":[{\"given\":\"两个字或一个字\",\"category\":\"低重名探索/清朗自然/稳妥经典/家长指定字优先\",\"total\":88,\"scores\":{\"destiny\":88,\"rarity\":86,\"sound\":87,\"meaning\":90,\"trend\":82,\"writing\":84},\"tags\":[\"...\"],\"parts\":[{\"char\":\"安\",\"element\":\"土\",\"meaning\":\"...\",\"allusion\":\"真实文化联想或典故出处，不确定则写文化联想\",\"elder\":\"给长辈解释的话\"}],\"reasons\":[\"五行取向...\",\"寓意...\",\"典故/文化联想...\"]}]}",
+    `内置知识体系：${namingKnowledgeForPrompt()}`,
+    `确定性排盘结果：${JSON.stringify(input.bazi || { error: input.baziError || "unavailable" })}`,
+    `用户输入：${JSON.stringify(input)}`,
+  ].join("\n");
+}
+
+function requestDeepSeek(messages) {
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify({
+      model: DEEPSEEK_MODEL,
+      messages,
+      temperature: 0.65,
+      max_tokens: 2600,
+      response_format: { type: "json_object" },
+    });
+
+    const request = https.request({
+      hostname: "api.deepseek.com",
+      path: "/chat/completions",
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(body),
+      },
+      timeout: 25_000,
+    }, (response) => {
+      let data = "";
+      response.on("data", (chunk) => {
+        data += chunk;
+      });
+      response.on("end", () => {
+        if (response.statusCode < 200 || response.statusCode >= 300) {
+          reject(new Error(`DeepSeek API failed: ${response.statusCode} ${data.slice(0, 300)}`));
+          return;
+        }
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices?.[0]?.message?.content || "";
+          resolve({ raw: parsed, content });
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+
+    request.on("timeout", () => {
+      request.destroy(new Error("DeepSeek API timeout"));
+    });
+    request.on("error", reject);
+    request.write(body);
+    request.end();
+  });
+}
+
+function clampNumber(value, fallback = 80) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.max(0, Math.min(100, Math.round(number)));
+}
+
+function normalizeAiPayload(input, content) {
+  const parsed = JSON.parse(content);
+  const candidates = Array.isArray(parsed.candidates) ? parsed.candidates : [];
+  return {
+    analysis: parsed.analysis || {},
+    candidates: candidates.slice(0, 9).map((candidate) => {
+      const given = String(candidate.given || "").replace(/\s/g, "").slice(0, Number(input.nameLength));
+      const scores = candidate.scores || {};
+      const parts = Array.isArray(candidate.parts) ? candidate.parts : [];
+      return {
+        given,
+        fullName: `${input.surname}${given}`,
+        comboKey: [...given].sort().join(""),
+        category: String(candidate.category || "AI 精选候选").slice(0, 16),
+        total: clampNumber(candidate.total, 84),
+        destiny: clampNumber(scores.destiny, 84),
+        rarity: clampNumber(scores.rarity, 82),
+        sound: clampNumber(scores.sound, 82),
+        meaning: clampNumber(scores.meaning, 86),
+        trend: clampNumber(scores.trend, 80),
+        writing: { total: clampNumber(scores.writing, 80) },
+        aiTags: Array.isArray(candidate.tags) ? candidate.tags.slice(0, 5).map((tag) => String(tag).slice(0, 12)) : [],
+        aiReasons: Array.isArray(candidate.reasons) ? candidate.reasons.slice(0, 4).map((reason) => String(reason).slice(0, 180)) : [],
+        parts: parts.map((part, index) => ({
+          c: String(part.char || given[index] || "").slice(0, 1),
+          e: String(part.element || input.neededElement || "").slice(0, 8),
+          tags: ["ai"],
+          meaning: String(part.meaning || "").slice(0, 80),
+          allusion: String(part.allusion || "").slice(0, 120),
+          elder: String(part.elder || "").slice(0, 100),
+        })).filter((part) => part.c),
+        source: "ai",
+      };
+    }).filter((candidate) => candidate.given && candidate.fullName),
+  };
 }
 
 function sanitizeLead(input) {
@@ -98,7 +372,8 @@ function sanitizeLead(input) {
 function serveStatic(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const pathname = decodeURIComponent(url.pathname);
-  const safePath = pathname === "/" ? "/index.html" : pathname;
+  const safeEntry = SITE_ENTRY.replace(/^\/+/, "");
+  const safePath = pathname === "/" ? `/${safeEntry}` : pathname;
   const filePath = path.normalize(path.join(ROOT, safePath));
 
   if (!filePath.startsWith(ROOT)) {
@@ -213,6 +488,104 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (req.method === "POST" && url.pathname === "/api/generate-name") {
+      const usage = readAiUsage();
+      const { userId, record } = getAiUser(req, usage);
+      const daily = getDailyAiUsage(usage);
+      const headers = { "Set-Cookie": makeAiUserCookie(userId) };
+      const remaining = Math.max(0, AI_FREE_GENERATION_LIMIT - Number(record.count || 0));
+
+      if (Number(daily.total || 0) >= AI_DAILY_GLOBAL_LIMIT) {
+        writeJsonWithHeaders(res, 429, {
+          ok: false,
+          error: "global_quota_exceeded",
+          message: "今日免费 AI 生成名额已用完，已回退本地规则生成。",
+          remaining,
+          dailyRemaining: 0,
+          fallbackAllowed: true,
+        }, headers);
+        return;
+      }
+
+      if (remaining <= 0) {
+        writeJsonWithHeaders(res, 429, {
+          ok: false,
+          error: "quota_exceeded",
+          message: `免费 AI 生成次数已用完。本轮每位用户可生成 ${AI_FREE_GENERATION_LIMIT} 次。`,
+          remaining: 0,
+          dailyRemaining: Math.max(0, AI_DAILY_GLOBAL_LIMIT - Number(daily.total || 0)),
+          fallbackAllowed: true,
+        }, headers);
+        return;
+      }
+
+      if (!DEEPSEEK_API_KEY) {
+        const body = await readRequestBody(req);
+        const input = sanitizeNameInput(JSON.parse(body || "{}"));
+        writeJsonWithHeaders(res, 503, {
+          ok: false,
+          error: "ai_not_configured",
+          message: "服务端尚未配置 DEEPSEEK_API_KEY，已回退本地规则生成。",
+          remaining,
+          dailyRemaining: Math.max(0, AI_DAILY_GLOBAL_LIMIT - Number(daily.total || 0)),
+          bazi: input.bazi || null,
+          fallbackAllowed: true,
+        }, headers);
+        return;
+      }
+
+      const body = await readRequestBody(req);
+      const input = sanitizeNameInput(JSON.parse(body || "{}"));
+      if (!input.surname || !input.birth || !input.city) {
+        writeJsonWithHeaders(res, 400, {
+          ok: false,
+          error: "invalid_input",
+          message: "请至少填写姓氏、出生时间和出生城市。",
+          remaining,
+          dailyRemaining: Math.max(0, AI_DAILY_GLOBAL_LIMIT - Number(daily.total || 0)),
+          bazi: input.bazi || null,
+          fallbackAllowed: true,
+        }, headers);
+        return;
+      }
+
+      try {
+        const aiResponse = await requestDeepSeek([
+          { role: "system", content: "你只输出可解析 JSON，必须克制、真实、可解释。" },
+          { role: "user", content: buildNamePrompt(input) },
+        ]);
+        record.count = Number(record.count || 0) + 1;
+        record.updatedAt = new Date().toISOString();
+        record.lastModel = DEEPSEEK_MODEL;
+        usage[userId] = record;
+        const updatedDaily = incrementDailyAiUsage(usage);
+        writeAiUsage(usage);
+
+        const normalized = normalizeAiPayload(input, aiResponse.content);
+        writeJsonWithHeaders(res, 200, {
+          ok: true,
+          model: DEEPSEEK_MODEL,
+          remaining: Math.max(0, AI_FREE_GENERATION_LIMIT - record.count),
+          dailyRemaining: Math.max(0, AI_DAILY_GLOBAL_LIMIT - Number(updatedDaily.total || 0)),
+          bazi: input.bazi || null,
+          analysis: normalized.analysis,
+          candidates: normalized.candidates,
+        }, headers);
+      } catch (error) {
+        console.error(`AI name generation failed: ${error.message}`);
+        writeJsonWithHeaders(res, 502, {
+          ok: false,
+          error: "ai_generation_failed",
+          message: "AI 生成暂时失败，已回退本地规则生成。",
+          remaining,
+          dailyRemaining: Math.max(0, AI_DAILY_GLOBAL_LIMIT - Number(daily.total || 0)),
+          bazi: input.bazi || null,
+          fallbackAllowed: true,
+        }, headers);
+      }
+      return;
+    }
+
     if (req.method === "GET" || req.method === "HEAD") {
       serveStatic(req, res);
       return;
@@ -225,6 +598,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 ensureLeadsFile();
+ensureJsonObjectFile(AI_USAGE_FILE);
 server.listen(PORT, HOST, () => {
   console.log(`托业成绩助手已启动：http://${HOST}:${PORT}`);
   if (LEADS_TOKEN) {

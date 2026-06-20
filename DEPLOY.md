@@ -4,6 +4,80 @@
 
 这个项目需要 Node 后端来接收表单，所以不要部署到纯静态平台。
 
+## 取名网站部署：qiming.vfingo.com
+
+取名网站使用同一个 Node 服务，但入口页要切到：
+
+```text
+SITE_ENTRY=name-mvp.html
+```
+
+### 1. Render 新建服务
+
+- New -> Web Service
+- Connect GitHub 仓库
+- Runtime: Node
+- Name: `vfingo-qiming`
+- Build Command: `npm install`
+- Start Command: `npm start`
+- Health Check Path: `/healthz`
+
+### 2. 取名服务环境变量
+
+必须设置：
+
+```text
+NODE_ENV=production
+SITE_ENTRY=name-mvp.html
+DEEPSEEK_API_KEY=你的 DeepSeek API Key
+DEEPSEEK_MODEL=deepseek-v4-flash
+AI_FREE_GENERATION_LIMIT=2
+AI_DAILY_GLOBAL_LIMIT=500
+```
+
+如果暂时没有 `DEEPSEEK_API_KEY`，页面仍可打开，但 AI 生成会回退本地规则。
+
+### 3. 绑定自定义域名
+
+在 Render 的 `vfingo-qiming` 服务里添加：
+
+```text
+qiming.vfingo.com
+```
+
+Render 会给出新的 Target，例如：
+
+```text
+vfingo-qiming.onrender.com
+```
+
+然后去 Cloudflare 修改 DNS：
+
+```text
+Type: CNAME
+Name: qiming
+Target: vfingo-qiming.onrender.com
+Proxy status: DNS only
+TTL: Auto
+```
+
+注意：你之前如果把 `qiming.vfingo.com` 指向了 `toeic-score-helper.onrender.com`，需要把 Target 改成新的取名服务地址。
+
+### 4. 验证
+
+Render 显示：
+
+```text
+Verified: Verified
+Certificate Status: Active / Issued
+```
+
+之后访问：
+
+```text
+https://qiming.vfingo.com
+```
+
 ### 1. 推送到 GitHub
 
 ```bash

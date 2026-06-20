@@ -19,3 +19,23 @@ services:
         sync: false
       - key: FEISHU_TABLE_ID
         sync: false
+  - type: web
+    name: vfingo-qiming
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SITE_ENTRY
+        value: name-mvp.html
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_MODEL
+        value: deepseek-v4-flash
+      - key: AI_FREE_GENERATION_LIMIT
+        value: 2
+      - key: AI_DAILY_GLOBAL_LIMIT
+        value: 500
