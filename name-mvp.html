@@ -3745,7 +3745,7 @@
         });
         const selected = [];
         [...buckets.values()].forEach((list) => selected.push(...list.slice(0, 3)));
-        return selected.slice(0, 12);
+        return selected.slice(0, 3);
       }
 
       function refreshCandidate(slotIndex) {
@@ -4041,6 +4041,17 @@
         return { deck, displayed: selectInitialCandidates(deck) };
       }
 
+      function uniqueCandidateDeck(list) {
+        const seenNames = new Set();
+        const seenCombos = new Set();
+        return list.filter((candidate) => {
+          if (seenNames.has(candidate.fullName) || seenCombos.has(candidate.comboKey)) return false;
+          seenNames.add(candidate.fullName);
+          seenCombos.add(candidate.comboKey);
+          return true;
+        });
+      }
+
       async function requestAiCandidates(input) {
         if (window.location.protocol === "file:") {
           throw new Error("当前用 file:// 打开页面，AI 接口需要通过 http://127.0.0.1:3000/name-mvp.html 访问。");
@@ -4183,8 +4194,9 @@
       function debugPanelHtml(input, candidates) {
         if (!DEBUG_MODE) return "";
         const info = input.debugInfo || {};
-        const aiCount = candidates.filter((candidate) => candidate.source === "ai").length;
-        const localCount = Math.max(0, candidates.length - aiCount);
+        const deck = candidateDeck.length ? candidateDeck : candidates;
+        const aiCount = deck.filter((candidate) => candidate.source === "ai").length;
+        const localCount = Math.max(0, deck.length - aiCount);
         const sourceText = info.source === "ai" ? "AI 生成" : "本地规则";
         const latencyText = Number.isFinite(Number(info.latencyMs)) ? `${(Number(info.latencyMs) / 1000).toFixed(1)} 秒` : "-";
         return `
@@ -4245,6 +4257,7 @@
           </section>
         `;
 
+        const overviewCandidates = candidates.slice(0, 3);
         const overview = `
           <section class="candidate-overview">
             <div class="candidate-overview-head">
@@ -4252,7 +4265,7 @@
               <a class="secondary overview-official" href="https://ywtb.mps.gov.cn/" target="_blank" rel="noopener noreferrer">去公安查重</a>
             </div>
             <div class="candidate-rail">
-              ${candidates.map((candidate) => `<button class="candidate-pill" type="button" data-copy-name="${candidate.fullName}" title="复制 ${candidate.fullName}">${candidate.fullName}</button>`).join("")}
+              ${overviewCandidates.map((candidate) => `<button class="candidate-pill" type="button" data-copy-name="${candidate.fullName}" title="复制 ${candidate.fullName}">${candidate.fullName}</button>`).join("")}
             </div>
           </section>
         `;
@@ -4386,8 +4399,8 @@
         try {
           const aiResult = await requestAiCandidates(currentInput);
           const local = localCandidatesForInput(currentInput);
-          candidateDeck = [...aiResult.candidates, ...local.deck];
-          displayedCandidates = aiResult.candidates.slice(0, 9);
+          candidateDeck = uniqueCandidateDeck([...aiResult.candidates, ...local.deck]);
+          displayedCandidates = selectInitialCandidates(candidateDeck);
           shouldAnimateResults = true;
           const dailyText = Number.isFinite(Number(aiResult.dailyRemaining)) ? `，今日余量 ${aiResult.dailyRemaining}` : "";
           showToast(`AI 已生成候选名，个人剩余 ${aiResult.remaining} 次${dailyText}`);

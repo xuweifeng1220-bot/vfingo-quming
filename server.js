@@ -242,6 +242,7 @@ function buildNamePrompt(input) {
     "请严格遵守内置知识体系：八字看喜用方向，不机械缺啥补啥；五格数理只做民俗姓名学辅助，不凌驾于现实可用性。",
     "服务端已提供确定性排盘结果。你必须以 bazi 字段为准，不得自行改写四柱、日主、五行强弱和喜用方向；如 caveat 提示为近似算法，请如实说明。",
     "请生成 9 个候选名。名字必须真实可用，避免生僻到难认、网红堆字、正反字序凑数、谐音风险、过度玄学；同一批候选不得大量重复同一个字、同一个偏旁或同一种意象。",
+    "注意：given 字段只能填写名字本身，绝对不能包含姓氏。例如姓氏为许、双字名时，given 应为“昭明”，不得写“许昭明”。",
     "每个候选名必须给出家长能理解的决策解释：先说这个名字的核心气质，再说明为什么适合当前孩子，尤其要解释为什么要补某个五行、这个名字如何回应该五行、补足后给名字带来什么气质。不要只写“缺火补火”这类短句。",
     "典故和文化联想必须克制真实：能确认出处才写具体出处；不能确认时明确写文化联想，不得伪造古籍篇名、诗句、作者。",
     "评分必须有区分度：9 个候选名总分建议分布在 82-94，不得全部相同。风险提醒必须真实，包括重名、谐音、生僻、网红感、过度特别、长辈接受度等。",
@@ -308,48 +309,87 @@ function clampNumber(value, fallback = 80) {
   return Math.max(0, Math.min(100, Math.round(number)));
 }
 
+function normalizeGivenName(value, input) {
+  const expectedLength = Number(input.nameLength);
+  let given = String(value || "")
+    .replace(/\s/g, "")
+    .replace(/[^\u4e00-\u9fff]/g, "");
+  const surname = String(input.surname || "").trim();
+  if (surname && given.startsWith(surname)) {
+    given = given.slice(surname.length);
+  }
+  while (surname && given.startsWith(surname)) {
+    given = given.slice(surname.length);
+  }
+  if (given.length !== expectedLength) return "";
+  if (surname && `${surname}${given}`.startsWith(`${surname}${surname}`)) return "";
+  if (new Set(given).size !== given.length) return "";
+  return given;
+}
+
+function normalizeAiPart(part, fallbackChar, input) {
+  const char = String(part?.char || fallbackChar || "").replace(/[^\u4e00-\u9fff]/g, "").slice(0, 1);
+  if (!char) return null;
+  return {
+    c: char,
+    e: String(part?.element || input.neededElement || "").slice(0, 8),
+    tags: ["ai"],
+    meaning: String(part?.meaning || "").slice(0, 80),
+    allusion: String(part?.allusion || "").slice(0, 120),
+    elder: String(part?.elder || "").slice(0, 100),
+  };
+}
+
 function normalizeAiPayload(input, content) {
   const parsed = JSON.parse(content);
   const candidates = Array.isArray(parsed.candidates) ? parsed.candidates : [];
+  const seenNames = new Set();
+  const seenCombos = new Set();
+  const normalizedCandidates = [];
+  for (const candidate of candidates) {
+    const given = normalizeGivenName(candidate.given, input);
+    if (!given) continue;
+    const fullName = `${input.surname}${given}`;
+    const comboKey = [...given].sort().join("");
+    if (seenNames.has(fullName) || seenCombos.has(comboKey)) continue;
+    seenNames.add(fullName);
+    seenCombos.add(comboKey);
+
+    const scores = candidate.scores || {};
+    const parts = Array.isArray(candidate.parts) ? candidate.parts : [];
+    const normalizedParts = [...given].map((char, index) => normalizeAiPart(parts[index], char, input)).filter(Boolean);
+    if (normalizedParts.length !== given.length) continue;
+
+    normalizedCandidates.push({
+      given,
+      fullName,
+      comboKey,
+      category: String(candidate.category || "AI 精选候选").slice(0, 16),
+      total: clampNumber(candidate.total, 84),
+      destiny: clampNumber(scores.destiny, 84),
+      rarity: clampNumber(scores.rarity, 82),
+      sound: clampNumber(scores.sound, 82),
+      meaning: clampNumber(scores.meaning, 86),
+      trend: clampNumber(scores.trend, 80),
+      writing: { total: clampNumber(scores.writing, 80) },
+      aiTags: Array.isArray(candidate.tags) ? candidate.tags.slice(0, 5).map((tag) => String(tag).slice(0, 12)) : [],
+      aiReasons: Array.isArray(candidate.reasons) ? candidate.reasons.slice(0, 4).map((reason) => String(reason).slice(0, 180)) : [],
+      explanation: {
+        verdict: String(candidate.verdict || "").slice(0, 180),
+        destinyFit: String(candidate.destinyFit || "").slice(0, 320),
+        meaningFit: String(candidate.meaningFit || "").slice(0, 260),
+        cultureFit: String(candidate.cultureFit || "").slice(0, 260),
+        riskNote: String(candidate.riskNote || "").slice(0, 220),
+        elderPitch: String(candidate.elderPitch || "").slice(0, 180),
+      },
+      parts: normalizedParts,
+      source: "ai",
+    });
+    if (normalizedCandidates.length >= 9) break;
+  }
   return {
     analysis: parsed.analysis || {},
-    candidates: candidates.slice(0, 9).map((candidate) => {
-      const given = String(candidate.given || "").replace(/\s/g, "").slice(0, Number(input.nameLength));
-      const scores = candidate.scores || {};
-      const parts = Array.isArray(candidate.parts) ? candidate.parts : [];
-      return {
-        given,
-        fullName: `${input.surname}${given}`,
-        comboKey: [...given].sort().join(""),
-        category: String(candidate.category || "AI 精选候选").slice(0, 16),
-        total: clampNumber(candidate.total, 84),
-        destiny: clampNumber(scores.destiny, 84),
-        rarity: clampNumber(scores.rarity, 82),
-        sound: clampNumber(scores.sound, 82),
-        meaning: clampNumber(scores.meaning, 86),
-        trend: clampNumber(scores.trend, 80),
-        writing: { total: clampNumber(scores.writing, 80) },
-        aiTags: Array.isArray(candidate.tags) ? candidate.tags.slice(0, 5).map((tag) => String(tag).slice(0, 12)) : [],
-        aiReasons: Array.isArray(candidate.reasons) ? candidate.reasons.slice(0, 4).map((reason) => String(reason).slice(0, 180)) : [],
-        explanation: {
-          verdict: String(candidate.verdict || "").slice(0, 180),
-          destinyFit: String(candidate.destinyFit || "").slice(0, 320),
-          meaningFit: String(candidate.meaningFit || "").slice(0, 260),
-          cultureFit: String(candidate.cultureFit || "").slice(0, 260),
-          riskNote: String(candidate.riskNote || "").slice(0, 220),
-          elderPitch: String(candidate.elderPitch || "").slice(0, 180),
-        },
-        parts: parts.map((part, index) => ({
-          c: String(part.char || given[index] || "").slice(0, 1),
-          e: String(part.element || input.neededElement || "").slice(0, 8),
-          tags: ["ai"],
-          meaning: String(part.meaning || "").slice(0, 80),
-          allusion: String(part.allusion || "").slice(0, 120),
-          elder: String(part.elder || "").slice(0, 100),
-        })).filter((part) => part.c),
-        source: "ai",
-      };
-    }).filter((candidate) => candidate.given && candidate.fullName),
+    candidates: normalizedCandidates,
   };
 }
 
