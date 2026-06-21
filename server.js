@@ -15,6 +15,7 @@ const HOST = process.env.HOST || (process.env.NODE_ENV === "production" ? "0.0.0
 const LEADS_TOKEN = process.env.LEADS_TOKEN || "";
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || "";
 const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-v4-flash";
+const DEEPSEEK_TIMEOUT_MS = Number(process.env.DEEPSEEK_TIMEOUT_MS || 90_000);
 const AI_FREE_GENERATION_LIMIT = Number(process.env.AI_FREE_GENERATION_LIMIT || 2);
 const AI_DAILY_GLOBAL_LIMIT = Number(process.env.AI_DAILY_GLOBAL_LIMIT || 500);
 const SITE_ENTRY = process.env.SITE_ENTRY || "index.html";
@@ -271,7 +272,7 @@ function requestDeepSeek(messages) {
         "Content-Type": "application/json",
         "Content-Length": Buffer.byteLength(body),
       },
-      timeout: 45_000,
+      timeout: DEEPSEEK_TIMEOUT_MS,
     }, (response) => {
       let data = "";
       response.on("data", (chunk) => {
@@ -561,20 +562,23 @@ const server = http.createServer(async (req, res) => {
       }
 
       try {
-        const aiResponse = await requestDeepSeek([
-          { role: "system", content: "你只输出可解析 JSON，必须克制、真实、可解释。" },
-          { role: "user", content: buildNamePrompt(input) },
-        ]);
         record.count = Number(record.count || 0) + 1;
         record.updatedAt = new Date().toISOString();
         record.lastModel = DEEPSEEK_MODEL;
         usage[userId] = record;
         const updatedDaily = incrementDailyAiUsage(usage);
         writeAiUsage(usage);
+        console.log(`AI name generation attempt: user=${userId} count=${record.count}/${AI_FREE_GENERATION_LIMIT} daily=${updatedDaily.total}/${AI_DAILY_GLOBAL_LIMIT} model=${DEEPSEEK_MODEL}`);
+
+        const aiResponse = await requestDeepSeek([
+          { role: "system", content: "你只输出可解析 JSON，必须克制、真实、可解释。" },
+          { role: "user", content: buildNamePrompt(input) },
+        ]);
 
         const normalized = normalizeAiPayload(input, aiResponse.content);
         writeJsonWithHeaders(res, 200, {
           ok: true,
+          source: "ai",
           model: DEEPSEEK_MODEL,
           remaining: Math.max(0, AI_FREE_GENERATION_LIMIT - record.count),
           dailyRemaining: Math.max(0, AI_DAILY_GLOBAL_LIMIT - Number(updatedDaily.total || 0)),
@@ -588,9 +592,10 @@ const server = http.createServer(async (req, res) => {
           ok: false,
           error: "ai_generation_failed",
           message: "AI 生成暂时失败，已回退本地规则生成。",
-          remaining,
-          dailyRemaining: Math.max(0, AI_DAILY_GLOBAL_LIMIT - Number(daily.total || 0)),
+          remaining: Math.max(0, AI_FREE_GENERATION_LIMIT - Number(record.count || 0)),
+          dailyRemaining: Math.max(0, AI_DAILY_GLOBAL_LIMIT - Number(getDailyAiUsage(usage).total || 0)),
           bazi: input.bazi || null,
+          source: "local",
           fallbackAllowed: true,
         }, headers);
       }
