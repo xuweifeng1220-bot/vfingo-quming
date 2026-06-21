@@ -501,19 +501,28 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === "POST" && url.pathname === "/api/generate-name") {
+      const requestStartedAt = Date.now();
       const usage = readAiUsage();
       const { userId, record } = getAiUser(req, usage);
       const daily = getDailyAiUsage(usage);
       const headers = { "Set-Cookie": makeAiUserCookie(userId) };
       const remaining = Math.max(0, AI_FREE_GENERATION_LIMIT - Number(record.count || 0));
+      const baseDebug = {
+        model: DEEPSEEK_MODEL,
+        timeoutMs: DEEPSEEK_TIMEOUT_MS,
+        userKey: hashValue(userId).slice(0, 12),
+      };
 
       if (Number(daily.total || 0) >= AI_DAILY_GLOBAL_LIMIT) {
         writeJsonWithHeaders(res, 429, {
           ok: false,
+          source: "local",
           error: "global_quota_exceeded",
           message: "今日免费 AI 生成名额已用完，已回退本地规则生成。",
           remaining,
           dailyRemaining: 0,
+          latencyMs: Date.now() - requestStartedAt,
+          debug: { ...baseDebug, source: "local", errorCode: "global_quota_exceeded" },
           fallbackAllowed: true,
         }, headers);
         return;
@@ -522,10 +531,13 @@ const server = http.createServer(async (req, res) => {
       if (remaining <= 0) {
         writeJsonWithHeaders(res, 429, {
           ok: false,
+          source: "local",
           error: "quota_exceeded",
           message: `免费 AI 生成次数已用完。本轮每位用户可生成 ${AI_FREE_GENERATION_LIMIT} 次。`,
           remaining: 0,
           dailyRemaining: Math.max(0, AI_DAILY_GLOBAL_LIMIT - Number(daily.total || 0)),
+          latencyMs: Date.now() - requestStartedAt,
+          debug: { ...baseDebug, source: "local", errorCode: "quota_exceeded" },
           fallbackAllowed: true,
         }, headers);
         return;
@@ -536,10 +548,13 @@ const server = http.createServer(async (req, res) => {
         const input = sanitizeNameInput(JSON.parse(body || "{}"));
         writeJsonWithHeaders(res, 503, {
           ok: false,
+          source: "local",
           error: "ai_not_configured",
           message: "服务端尚未配置 DEEPSEEK_API_KEY，已回退本地规则生成。",
           remaining,
           dailyRemaining: Math.max(0, AI_DAILY_GLOBAL_LIMIT - Number(daily.total || 0)),
+          latencyMs: Date.now() - requestStartedAt,
+          debug: { ...baseDebug, source: "local", errorCode: "ai_not_configured" },
           bazi: input.bazi || null,
           fallbackAllowed: true,
         }, headers);
@@ -551,10 +566,13 @@ const server = http.createServer(async (req, res) => {
       if (!input.surname || !input.birth || !input.city) {
         writeJsonWithHeaders(res, 400, {
           ok: false,
+          source: "local",
           error: "invalid_input",
           message: "请至少填写姓氏、出生时间和出生城市。",
           remaining,
           dailyRemaining: Math.max(0, AI_DAILY_GLOBAL_LIMIT - Number(daily.total || 0)),
+          latencyMs: Date.now() - requestStartedAt,
+          debug: { ...baseDebug, source: "local", errorCode: "invalid_input" },
           bazi: input.bazi || null,
           fallbackAllowed: true,
         }, headers);
@@ -576,26 +594,33 @@ const server = http.createServer(async (req, res) => {
         ]);
 
         const normalized = normalizeAiPayload(input, aiResponse.content);
+        const latencyMs = Date.now() - requestStartedAt;
+        console.log(`AI name generation success: user=${userId} latencyMs=${latencyMs} candidates=${normalized.candidates.length}`);
         writeJsonWithHeaders(res, 200, {
           ok: true,
           source: "ai",
           model: DEEPSEEK_MODEL,
           remaining: Math.max(0, AI_FREE_GENERATION_LIMIT - record.count),
           dailyRemaining: Math.max(0, AI_DAILY_GLOBAL_LIMIT - Number(updatedDaily.total || 0)),
+          latencyMs,
+          debug: { ...baseDebug, source: "ai", errorCode: null },
           bazi: input.bazi || null,
           analysis: normalized.analysis,
           candidates: normalized.candidates,
         }, headers);
       } catch (error) {
         console.error(`AI name generation failed: ${error.message}`);
+        const errorCode = error.message.includes("timeout") ? "timeout" : "ai_generation_failed";
         writeJsonWithHeaders(res, 502, {
           ok: false,
           error: "ai_generation_failed",
           message: "AI 生成暂时失败，已回退本地规则生成。",
           remaining: Math.max(0, AI_FREE_GENERATION_LIMIT - Number(record.count || 0)),
           dailyRemaining: Math.max(0, AI_DAILY_GLOBAL_LIMIT - Number(getDailyAiUsage(usage).total || 0)),
+          latencyMs: Date.now() - requestStartedAt,
           bazi: input.bazi || null,
           source: "local",
+          debug: { ...baseDebug, source: "local", errorCode },
           fallbackAllowed: true,
         }, headers);
       }

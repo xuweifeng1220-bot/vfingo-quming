@@ -930,6 +930,46 @@
         font-size: 14px;
       }
 
+      .debug-panel {
+        display: grid;
+        gap: 10px;
+        border: 1px solid rgba(166, 66, 50, 0.22);
+        border-radius: 14px;
+        background: rgba(255, 246, 229, 0.92);
+        padding: 14px;
+      }
+
+      .debug-panel h3 {
+        color: var(--rose);
+        font-size: 16px;
+      }
+
+      .debug-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .debug-grid div {
+        display: grid;
+        gap: 3px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.72);
+        padding: 9px 10px;
+      }
+
+      .debug-grid span {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .debug-grid strong {
+        color: var(--ink);
+        font-size: 13px;
+        word-break: break-word;
+      }
+
       .toast {
         position: fixed;
         right: 24px;
@@ -3241,6 +3281,7 @@
     <script src="name-person-insights.js"></script>
     <script>
       const DEFAULT_WEIGHTS = { destiny: 0.3, rarity: 0.3, sound: 0.15, meaning: 0.15, trend: 0.1 };
+      const DEBUG_MODE = new URLSearchParams(window.location.search).has("debug");
 
       const imageOptions = [
         { key: "water", label: "水", elements: ["水"], tone: "灵动、包容、智慧", tags: ["water", "clean"] },
@@ -4018,13 +4059,39 @@
         if (!response.ok || !result.ok) {
           const error = new Error("生成完成，请查看候选结果。");
           error.bazi = result.bazi || null;
+          error.debugInfo = result.debug || {
+            source: result.source || "local",
+            model: result.model || "",
+            latencyMs: result.latencyMs,
+            errorCode: result.error || "request_failed",
+            remaining: result.remaining,
+            dailyRemaining: result.dailyRemaining,
+          };
           throw error;
         }
         if (!Array.isArray(result.candidates) || !result.candidates.length) {
-          throw new Error("生成完成，请查看候选结果。");
+          const error = new Error("生成完成，请查看候选结果。");
+          error.debugInfo = {
+            source: result.source || "local",
+            model: result.model || "",
+            latencyMs: result.latencyMs,
+            errorCode: "empty_candidates",
+            remaining: result.remaining,
+            dailyRemaining: result.dailyRemaining,
+          };
+          throw error;
         }
         input.aiAnalysis = result.analysis || {};
         input.aiBazi = result.bazi || null;
+        input.debugInfo = {
+          ...(result.debug || {}),
+          source: result.source || "ai",
+          model: result.model || result.debug?.model || "",
+          latencyMs: result.latencyMs,
+          errorCode: result.debug?.errorCode || null,
+          remaining: result.remaining,
+          dailyRemaining: result.dailyRemaining,
+        };
         if (result.bazi?.usefulElements?.[0]) {
           input.neededElement = result.bazi.usefulElements[0];
         }
@@ -4113,6 +4180,30 @@
         });
       }
 
+      function debugPanelHtml(input, candidates) {
+        if (!DEBUG_MODE) return "";
+        const info = input.debugInfo || {};
+        const aiCount = candidates.filter((candidate) => candidate.source === "ai").length;
+        const localCount = Math.max(0, candidates.length - aiCount);
+        const sourceText = info.source === "ai" ? "AI 生成" : "本地规则";
+        const latencyText = Number.isFinite(Number(info.latencyMs)) ? `${(Number(info.latencyMs) / 1000).toFixed(1)} 秒` : "-";
+        return `
+          <section class="debug-panel" aria-label="调试信息">
+            <h3>调试信息</h3>
+            <div class="debug-grid">
+              <div><span>结果来源</span><strong>${escapeHtml(sourceText)}</strong></div>
+              <div><span>模型</span><strong>${escapeHtml(info.model || "-")}</strong></div>
+              <div><span>耗时</span><strong>${escapeHtml(latencyText)}</strong></div>
+              <div><span>错误码</span><strong>${escapeHtml(info.errorCode || "-")}</strong></div>
+              <div><span>个人剩余</span><strong>${Number.isFinite(Number(info.remaining)) ? info.remaining : "-"}</strong></div>
+              <div><span>今日剩余</span><strong>${Number.isFinite(Number(info.dailyRemaining)) ? info.dailyRemaining : "-"}</strong></div>
+              <div><span>候选构成</span><strong>AI ${aiCount} / 本地 ${localCount}</strong></div>
+              <div><span>用户标识</span><strong>${escapeHtml(info.userKey || "-")}</strong></div>
+            </div>
+          </section>
+        `;
+      }
+
       function render(input, candidates) {
         closeScorePanel();
         output.classList.add("has-results");
@@ -4166,7 +4257,7 @@
           </section>
         `;
 
-        cards.innerHTML = brief + overview + [...grouped.entries()].map(([category, list]) => `
+        cards.innerHTML = debugPanelHtml(input, candidates) + brief + overview + [...grouped.entries()].map(([category, list]) => `
           <section class="result-group">
             <h3>${category}</h3>
             <div class="cards group-cards">
@@ -4307,6 +4398,15 @@
               currentInput.neededElement = error.bazi.usefulElements[0];
             }
           }
+          currentInput.debugInfo = {
+            source: "local",
+            model: error.debugInfo?.model || "",
+            latencyMs: error.debugInfo?.latencyMs,
+            errorCode: error.debugInfo?.errorCode || "local_fallback",
+            remaining: error.debugInfo?.remaining,
+            dailyRemaining: error.debugInfo?.dailyRemaining,
+            userKey: error.debugInfo?.userKey || "",
+          };
           const local = localCandidatesForInput(currentInput);
           candidateDeck = local.deck;
           displayedCandidates = local.displayed;
