@@ -438,6 +438,38 @@
         padding: 20px;
       }
 
+      .input-people-panel {
+        display: grid;
+        gap: 12px;
+        border: 1px solid rgba(21, 92, 79, 0.18);
+        border-radius: 14px;
+        background:
+          radial-gradient(circle at 100% 0%, rgba(221, 179, 103, 0.18), transparent 34%),
+          rgba(255, 255, 255, 0.64);
+        padding: 12px;
+      }
+
+      .input-people-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .input-people-head strong {
+        display: block;
+        color: var(--ink);
+        font-size: 14px;
+      }
+
+      .input-people-head span {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
       .people-head {
         display: flex;
         align-items: flex-start;
@@ -459,6 +491,11 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 12px;
+      }
+
+      .input-people-panel .people-grid {
+        grid-template-columns: 1fr;
+        gap: 9px;
       }
 
       .person-card {
@@ -524,6 +561,21 @@
       .person-card p {
         color: #364844;
         font-size: 14px;
+      }
+
+      .input-people-panel .person-card {
+        gap: 7px;
+        padding: 10px;
+        box-shadow: none;
+      }
+
+      .input-people-panel .person-card h3 {
+        font-size: 14px;
+      }
+
+      .input-people-panel .person-meta,
+      .input-people-panel .person-card p {
+        font-size: 12px;
       }
 
       .person-keywords {
@@ -705,6 +757,13 @@
       .reason-item p {
         margin: 0;
         color: #40524d;
+      }
+
+      .detail-button {
+        width: fit-content;
+        min-height: 34px;
+        padding-inline: 13px;
+        font-size: 13px;
       }
 
       .meter {
@@ -895,6 +954,159 @@
       .toast.is-visible {
         opacity: 1;
         transform: translateY(0) scale(1);
+      }
+
+      .generation-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 55;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        background: rgba(244, 247, 242, 0.56);
+        backdrop-filter: blur(5px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 180ms var(--ease-out);
+      }
+
+      .generation-overlay.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .generation-card {
+        width: min(420px, calc(100vw - 40px));
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+        border: 1px solid rgba(21, 92, 79, 0.18);
+        border-radius: 18px;
+        background:
+          radial-gradient(circle at 50% 0%, rgba(221, 179, 103, 0.2), transparent 34%),
+          rgba(255, 255, 255, 0.9);
+        box-shadow: 0 18px 50px rgba(21, 35, 31, 0.16);
+        padding: 24px;
+        text-align: center;
+      }
+
+      .generation-mark {
+        width: 44px;
+        height: 44px;
+        border: 2px solid rgba(21, 92, 79, 0.18);
+        border-top-color: var(--accent-dark);
+        border-radius: 999px;
+        animation: spin 900ms linear infinite;
+      }
+
+      .generation-card strong {
+        color: var(--ink);
+        font-size: 18px;
+      }
+
+      .generation-card p {
+        max-width: 30ch;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .detail-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: grid;
+        place-items: center;
+        padding: 22px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 180ms var(--ease-out);
+      }
+
+      .detail-modal.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .detail-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(17, 31, 28, 0.36);
+        backdrop-filter: blur(3px);
+      }
+
+      .detail-card {
+        position: relative;
+        width: min(760px, calc(100vw - 44px));
+        max-height: min(78vh, 760px);
+        overflow: auto;
+        display: grid;
+        gap: 16px;
+        border: 1px solid rgba(21, 92, 79, 0.18);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 18px 52px rgba(21, 35, 31, 0.22);
+        padding: 22px;
+      }
+
+      .detail-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .detail-head h3 {
+        color: var(--ink);
+        font-size: 28px;
+      }
+
+      .detail-head p {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .detail-close {
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #fff;
+        color: var(--ink);
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      .detail-sections {
+        display: grid;
+        gap: 12px;
+      }
+
+      .detail-section {
+        display: grid;
+        gap: 6px;
+        border: 1px solid rgba(21, 35, 31, 0.08);
+        border-radius: 12px;
+        background: rgba(238, 244, 239, 0.54);
+        padding: 13px 14px;
+      }
+
+      .detail-section strong {
+        color: var(--accent-dark);
+        font-size: 14px;
+      }
+
+      .detail-section p {
+        color: #354943;
+        font-size: 15px;
+        line-height: 1.75;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
 
       .empty {
@@ -2841,6 +3053,19 @@
               </label>
             </div>
 
+            <div class="input-people-panel" id="peoplePanel">
+              <div class="input-people-head">
+                <div>
+                  <strong>同辰人物灵感</strong>
+                  <span>填写出生日期后，可选择 1-2 位人物作为价值观和典故参考。</span>
+                </div>
+                <div class="selected-people" id="selectedPeopleNote">未选择</div>
+              </div>
+              <div class="people-grid" id="peopleGrid">
+                <div class="empty">填写出生日期后，会出现同辰人物灵感。</div>
+              </div>
+            </div>
+
             <div class="grid-2">
               <label>
                 名字字数
@@ -2948,20 +3173,7 @@
             <div class="support-head">
               <div>
                 <h2>取名依据与迭代</h2>
-                <p>人物灵感和偏好会参与上方候选更新；命理依据用于解释方向，不替代家庭判断。</p>
-              </div>
-            </div>
-
-            <div class="people-panel" id="peoplePanel">
-              <div class="people-head">
-                <div>
-                  <h2>同辰人物灵感</h2>
-                  <p>根据出生日期提供中外正向人物素材，用于提炼价值观和名字典故，不暗示命运相同。</p>
-                  <div class="selected-people" id="selectedPeopleNote">可选择 1-2 位人物作为价值观灵感</div>
-                </div>
-              </div>
-              <div class="people-grid" id="peopleGrid">
-                <div class="empty">填写出生日期后，会出现同辰人物灵感，可选择 1-2 位加入取名逻辑。</div>
+                <p>命理依据用于解释方向，偏好意象和人物灵感会在下一次生成时参与候选更新。</p>
               </div>
             </div>
 
@@ -3013,7 +3225,18 @@
       </section>
     </main>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="generation-overlay" id="generationOverlay" role="status" aria-live="polite" aria-hidden="true">
+      <div class="generation-card">
+        <div class="generation-mark" aria-hidden="true"></div>
+        <strong>正在生成候选名</strong>
+        <p id="generationMessage">正在校验出生信息，并准备命理取向。</p>
+      </div>
+    </div>
     <div class="score-panel" id="scorePanel" role="dialog" aria-hidden="true"></div>
+    <div class="detail-modal" id="detailModal" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="detail-backdrop" data-detail-close></div>
+      <article class="detail-card" id="detailCard"></article>
+    </div>
 
     <script src="name-person-insights.js"></script>
     <script>
@@ -3155,6 +3378,10 @@
       const selectedPeopleNote = document.querySelector("#selectedPeopleNote");
       const toast = document.querySelector("#toast");
       const scorePanel = document.querySelector("#scorePanel");
+      const generationOverlay = document.querySelector("#generationOverlay");
+      const generationMessage = document.querySelector("#generationMessage");
+      const detailModal = document.querySelector("#detailModal");
+      const detailCard = document.querySelector("#detailCard");
       let currentInput = null;
       let candidateDeck = [];
       let displayedCandidates = [];
@@ -3163,6 +3390,7 @@
       let selectedImageKeys = new Set();
       let refreshCounts = {};
       let toastTimer = null;
+      let generationTimers = [];
       let shouldAnimateResults = false;
 
       function updateFlowState(stage = "input") {
@@ -3228,7 +3456,7 @@
             }
             renderImageChips();
             updateFlowState();
-            regenerateFromCurrentInput();
+            markInputChanged("偏好意象已更新，重新点击免费生成后生效");
           });
           chips.append(button);
         });
@@ -3247,6 +3475,103 @@
         toastTimer = window.setTimeout(() => {
           toast.classList.remove("is-visible");
         }, 1800);
+      }
+
+      function setGenerationMessage(message) {
+        if (generationMessage) generationMessage.textContent = message;
+      }
+
+      function showGenerationOverlay() {
+        if (!generationOverlay) return;
+        generationTimers.forEach((timer) => window.clearTimeout(timer));
+        generationTimers = [];
+        setGenerationMessage("正在校验出生信息，并准备命理取向。");
+        generationOverlay.classList.add("is-visible");
+        generationOverlay.setAttribute("aria-hidden", "false");
+        [
+          [1800, "正在排盘并判断五行喜用，稍后会进入名字生成。"],
+          [5200, "正在调用 AI 生成候选名，并整理寓意、典故和风险说明。"],
+          [11000, "正在筛掉重复感较强的组合，并压缩成少量候选。"],
+          [20000, "分析仍在继续，复杂输入可能需要几十秒，请保持页面打开。"],
+        ].forEach(([delay, message]) => {
+          generationTimers.push(window.setTimeout(() => setGenerationMessage(message), delay));
+        });
+      }
+
+      function hideGenerationOverlay() {
+        if (!generationOverlay) return;
+        generationTimers.forEach((timer) => window.clearTimeout(timer));
+        generationTimers = [];
+        generationOverlay.classList.remove("is-visible");
+        generationOverlay.setAttribute("aria-hidden", "true");
+      }
+
+      function currentDraftInput() {
+        const draft = {
+          surname: document.querySelector("#surname").value.trim(),
+          gender: document.querySelector("#gender").value,
+          birth: document.querySelector("#birth").value,
+          city: document.querySelector("#city").value.trim(),
+          nameLength: document.querySelector("#nameLength").value,
+          style: document.querySelector("#style").value,
+          requiredChars: document.querySelector("#requiredChars").value,
+          blockedChars: document.querySelector("#blockedChars").value,
+          wishes: document.querySelector("#wishes").value,
+        };
+        draft.neededElement = inferElement(draft.birth, draft.city);
+        return draft;
+      }
+
+      function markInputChanged(message = "输入条件已更新，重新点击免费生成后生效") {
+        if (displayedCandidates.length) showToast(message);
+      }
+
+      function firstSentence(value) {
+        const text = String(value || "").replace(/…|\.{3}/g, "").replace(/\s+/g, " ").trim();
+        if (!text) return "";
+        const match = text.match(/^[^。！？!?]+[。！？!?]?/);
+        return (match ? match[0] : text).trim();
+      }
+
+      function cardExplanationSections(candidate, input) {
+        const sections = explanationSections(candidate, input);
+        const verdict = sections.find((section) => section.type === "verdict") || sections[0];
+        const wanted = ["命理取向", "名字寓意", "文化联想"];
+        const body = wanted.map((label) => sections.find((section) => section.label === label)).filter(Boolean);
+        return [verdict, ...body].filter(Boolean).slice(0, 4).map((section) => ({
+          ...section,
+          text: firstSentence(section.text),
+        }));
+      }
+
+      function closeDetailModal() {
+        if (!detailModal) return;
+        detailModal.classList.remove("is-visible");
+        detailModal.setAttribute("aria-hidden", "true");
+      }
+
+      function openDetailModal(candidate, input) {
+        if (!detailModal || !detailCard) return;
+        const sections = explanationSections(candidate, input);
+        detailCard.innerHTML = `
+          <div class="detail-head">
+            <div>
+              <h3>${escapeHtml(candidate.fullName)}</h3>
+              <p>完整解释会展开命理取向、名字寓意、文化联想和使用提醒。</p>
+            </div>
+            <button class="detail-close" type="button" data-detail-close aria-label="关闭">×</button>
+          </div>
+          <div class="detail-sections">
+            ${sections.map((section) => `
+              <section class="detail-section">
+                <strong>${escapeHtml(section.label)}</strong>
+                <p>${escapeHtml(section.text)}</p>
+              </section>
+            `).join("")}
+          </div>
+        `;
+        detailModal.classList.add("is-visible");
+        detailModal.setAttribute("aria-hidden", "false");
       }
 
       function closeScorePanel() {
@@ -3631,7 +3956,9 @@
 
       function compactText(value, fallback, maxLength = 44) {
         const text = String(value || fallback || "").trim();
-        return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+        if (text.length <= maxLength) return text;
+        const sentence = firstSentence(text);
+        return sentence.length <= maxLength ? sentence : text.slice(0, maxLength);
       }
 
       function escapeHtml(value) {
@@ -3734,10 +4061,16 @@
           selectedPeople = [...selectedPeople, person].slice(-2);
         }
         updateFlowState();
-        regenerateFromCurrentInput();
+        renderPeople(currentDraftInput());
+        markInputChanged("人物灵感已更新，重新点击免费生成后生效");
       }
 
       function renderPeople(input) {
+        if (!input?.birth) {
+          peopleGrid.innerHTML = `<div class="empty">填写出生日期后，会出现同辰人物灵感。</div>`;
+          selectedPeopleNote.textContent = selectedPeople.length ? `已选择：${selectedPeopleNames()}` : "未选择";
+          return;
+        }
         const people = peopleForInput(input);
         if (!people.length) {
           peopleGrid.innerHTML = `<div class="empty">人物灵感库未加载。请确认 name-person-insights.js 与页面在同一目录。</div>`;
@@ -3840,7 +4173,7 @@
               ${list.map((candidate) => {
                 const index = candidates.indexOf(candidate);
                 const tags = nameTags(candidate).map((tag) => `<span class="name-tag">${tag}</span>`).join("");
-                const reasons = explanationSections(candidate, input).map((section) => {
+                const reasons = cardExplanationSections(candidate, input).map((section) => {
                   const text = escapeHtml(section.text);
                   if (section.type === "verdict") {
                     return `<div class="name-verdict">${text}</div>`;
@@ -3878,6 +4211,7 @@
                       </div>
                     </div>
                     <div class="reason-list">${reasons}</div>
+                    <button class="secondary detail-button" type="button" data-detail="${index}">查看完整解释</button>
                   </article>
                 `;
               }).join("")}
@@ -3904,6 +4238,13 @@
           });
         });
 
+        cards.querySelectorAll("[data-detail]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const candidate = candidates[Number(button.dataset.detail)];
+            if (candidate) openDetailModal(candidate, input);
+          });
+        });
+
         cards.querySelectorAll("[data-copy-name]").forEach((button) => {
           button.addEventListener("click", async () => {
             try {
@@ -3926,29 +4267,30 @@
         closeScorePanel();
       });
 
+      detailModal?.addEventListener("click", (event) => {
+        if (event.target.closest("[data-detail-close]")) closeDetailModal();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeScorePanel();
+          closeDetailModal();
+        }
+      });
+
       window.addEventListener("resize", closeScorePanel);
       window.addEventListener("scroll", closeScorePanel, true);
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         if (!form.reportValidity()) return;
-        currentInput = {
-          surname: document.querySelector("#surname").value.trim(),
-          gender: document.querySelector("#gender").value,
-          birth: document.querySelector("#birth").value,
-          city: document.querySelector("#city").value.trim(),
-          nameLength: document.querySelector("#nameLength").value,
-          style: document.querySelector("#style").value,
-          requiredChars: document.querySelector("#requiredChars").value,
-          blockedChars: document.querySelector("#blockedChars").value,
-          wishes: document.querySelector("#wishes").value,
-        };
-        currentInput.neededElement = inferElement(currentInput.birth, currentInput.city);
+        currentInput = currentDraftInput();
         refreshCounts = {};
         const originalButtonText = submitLabel.textContent;
         submitButton.disabled = true;
         submitButton.classList.add("is-loading");
         submitLabel.textContent = "排盘与生成中";
+        showGenerationOverlay();
         updateFlowState("result");
         try {
           const aiResult = await requestAiCandidates(currentInput);
@@ -3969,19 +4311,30 @@
           candidateDeck = local.deck;
           displayedCandidates = local.displayed;
           shouldAnimateResults = true;
-          showToast(error.message || "AI 暂不可用，已使用本地规则生成");
+          showToast(error.message || "生成完成，请查看候选结果");
         } finally {
           submitButton.disabled = false;
           submitButton.classList.remove("is-loading");
           submitLabel.textContent = originalButtonText;
         }
         render(currentInput, displayedCandidates);
+        hideGenerationOverlay();
       });
 
       selectedImageKeys = new Set();
       renderImageChips();
+      renderPeople(currentDraftInput());
       ["#surname", "#birth", "#city"].forEach((selector) => {
         document.querySelector(selector).addEventListener("input", () => updateFlowState());
+      });
+      document.querySelector("#birth").addEventListener("input", () => {
+        selectedPeople = [];
+        expandedPeople = new Set();
+        renderPeople(currentDraftInput());
+        markInputChanged("出生日期已更新，人物灵感已重置，重新点击免费生成后生效");
+      });
+      document.querySelector("#city").addEventListener("input", () => {
+        renderPeople(currentDraftInput());
       });
       updateFlowState();
     </script>
