@@ -240,9 +240,12 @@ function buildNamePrompt(input) {
     "你是一名严谨克制的中文新生儿取名顾问。你可以参考传统命理、五行、音律、典故、重名风险和家长期望，但不得宣称拥有官方同名数据库，不得做改命承诺。",
     "请严格遵守内置知识体系：八字看喜用方向，不机械缺啥补啥；五格数理只做民俗姓名学辅助，不凌驾于现实可用性。",
     "服务端已提供确定性排盘结果。你必须以 bazi 字段为准，不得自行改写四柱、日主、五行强弱和喜用方向；如 caveat 提示为近似算法，请如实说明。",
-    "请生成 9 个候选名。名字必须真实可用，避免生僻到难认、网红堆字、正反字序凑数、谐音风险、过度玄学。",
+    "请生成 9 个候选名。名字必须真实可用，避免生僻到难认、网红堆字、正反字序凑数、谐音风险、过度玄学；同一批候选不得大量重复同一个字、同一个偏旁或同一种意象。",
+    "每个候选名必须给出家长能理解的决策解释：先说这个名字的核心气质，再说明为什么适合当前孩子，尤其要解释为什么要补某个五行、这个名字如何回应该五行、补足后给名字带来什么气质。不要只写“缺火补火”这类短句。",
+    "典故和文化联想必须克制真实：能确认出处才写具体出处；不能确认时明确写文化联想，不得伪造古籍篇名、诗句、作者。",
+    "评分必须有区分度：9 个候选名总分建议分布在 82-94，不得全部相同。风险提醒必须真实，包括重名、谐音、生僻、网红感、过度特别、长辈接受度等。",
     "输出必须是 JSON，不要 Markdown，不要额外解释。",
-    "JSON 结构：{\"analysis\":{\"destiny\":\"基于输入信息的命理取向说明\",\"baziNote\":\"说明当前是否为完整四柱排盘，不得编造四柱\",\"wugeNote\":\"五格数理如何作为辅助参考\",\"method\":\"本次生成如何结合五行、字义、重名、音律、五格\",\"caveat\":\"边界声明\"},\"candidates\":[{\"given\":\"两个字或一个字\",\"category\":\"低重名探索/清朗自然/稳妥经典/家长指定字优先\",\"total\":88,\"scores\":{\"destiny\":88,\"rarity\":86,\"sound\":87,\"meaning\":90,\"trend\":82,\"writing\":84},\"tags\":[\"...\"],\"parts\":[{\"char\":\"安\",\"element\":\"土\",\"meaning\":\"...\",\"allusion\":\"真实文化联想或典故出处，不确定则写文化联想\",\"elder\":\"给长辈解释的话\"}],\"reasons\":[\"五行取向...\",\"寓意...\",\"典故/文化联想...\"]}]}",
+    "JSON 结构：{\"analysis\":{\"destiny\":\"基于输入信息的命理取向说明\",\"baziNote\":\"说明当前是否为完整四柱排盘，不得编造四柱\",\"wugeNote\":\"五格数理如何作为辅助参考\",\"method\":\"本次生成如何结合五行、字义、重名、音律、五格\",\"caveat\":\"边界声明\"},\"candidates\":[{\"given\":\"两个字或一个字\",\"category\":\"低重名探索/清朗自然/稳妥经典/家长指定字优先\",\"total\":88,\"scores\":{\"destiny\":88,\"rarity\":86,\"sound\":87,\"meaning\":90,\"trend\":82,\"writing\":84},\"tags\":[\"...\"],\"verdict\":\"一句话主判断：说明这个名字的核心气质和适合什么样的家庭期待\",\"destinyFit\":\"命理取向：为什么当前取名倾向补某五行；这个名字用哪些字义或意象回应该五行；补足后给名字带来什么气质。必须结合 bazi.usefulElements，不得机械堆偏旁。\",\"meaningFit\":\"名字寓意：解释整个名字合在一起的含义，不要只逐字释义。\",\"cultureFit\":\"典故/文化联想：能确认才写出处，不能确认就写文化联想；不得伪造。\",\"riskNote\":\"使用提醒：说明重名、谐音、生僻、网红感、过度特别或长辈接受度风险，以及如何复核。\",\"elderPitch\":\"给长辈解释的一句话\",\"parts\":[{\"char\":\"安\",\"element\":\"土\",\"meaning\":\"单字含义\",\"allusion\":\"真实文化联想或典故出处，不确定则写文化联想\",\"elder\":\"给长辈解释的话\"}],\"reasons\":[\"兼容旧字段，可为空或概括以上判断\"]}]}",
     `内置知识体系：${namingKnowledgeForPrompt()}`,
     `确定性排盘结果：${JSON.stringify(input.bazi || { error: input.baziError || "unavailable" })}`,
     `用户输入：${JSON.stringify(input)}`,
@@ -255,7 +258,7 @@ function requestDeepSeek(messages) {
       model: DEEPSEEK_MODEL,
       messages,
       temperature: 0.65,
-      max_tokens: 2600,
+      max_tokens: 4200,
       response_format: { type: "json_object" },
     });
 
@@ -268,7 +271,7 @@ function requestDeepSeek(messages) {
         "Content-Type": "application/json",
         "Content-Length": Buffer.byteLength(body),
       },
-      timeout: 25_000,
+      timeout: 45_000,
     }, (response) => {
       let data = "";
       response.on("data", (chunk) => {
@@ -327,6 +330,14 @@ function normalizeAiPayload(input, content) {
         writing: { total: clampNumber(scores.writing, 80) },
         aiTags: Array.isArray(candidate.tags) ? candidate.tags.slice(0, 5).map((tag) => String(tag).slice(0, 12)) : [],
         aiReasons: Array.isArray(candidate.reasons) ? candidate.reasons.slice(0, 4).map((reason) => String(reason).slice(0, 180)) : [],
+        explanation: {
+          verdict: String(candidate.verdict || "").slice(0, 180),
+          destinyFit: String(candidate.destinyFit || "").slice(0, 320),
+          meaningFit: String(candidate.meaningFit || "").slice(0, 260),
+          cultureFit: String(candidate.cultureFit || "").slice(0, 260),
+          riskNote: String(candidate.riskNote || "").slice(0, 220),
+          elderPitch: String(candidate.elderPitch || "").slice(0, 180),
+        },
         parts: parts.map((part, index) => ({
           c: String(part.char || given[index] || "").slice(0, 1),
           e: String(part.element || input.neededElement || "").slice(0, 8),

@@ -674,12 +674,37 @@
 
       .reason-list {
         display: grid;
-        gap: 7px;
+        gap: 10px;
         margin: 0;
         padding: 0;
         list-style: none;
         color: var(--muted);
         font-size: 14px;
+      }
+
+      .name-verdict {
+        border-radius: 10px;
+        background: rgba(232, 239, 235, 0.68);
+        color: #263c36;
+        padding: 11px 12px;
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .reason-item {
+        display: grid;
+        gap: 4px;
+      }
+
+      .reason-label {
+        color: var(--accent-dark);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .reason-item p {
+        margin: 0;
+        color: #40524d;
       }
 
       .meter {
@@ -3109,6 +3134,14 @@
         "金": "金：规则、清正、判断",
       };
 
+      const elementGuidance = {
+        "水": "水对应智慧、涵养、流动和适应力。取名时引入水的意象，是为了让名字更有包容感和灵活度，不必机械使用三点水。",
+        "木": "木对应生发、成长、仁厚和舒展。取名时引入木的意象，是为了增强生命力、文气和向上生长的感觉。",
+        "火": "火对应明朗、表达、行动力和温暖感。取名时引入火的意象，是为了让名字更开阔、有光亮和主动性，不等于必须使用火字旁。",
+        "土": "土对应稳定、承载、秩序和家风根基。取名时引入土的意象，是为了让名字更稳妥、可信、有安定感。",
+        "金": "金对应规则、判断、清朗和边界感。取名时引入金的意象，是为了让名字更清正、有分寸和辨识度。",
+      };
+
       const form = document.querySelector("#namingForm");
       const submitButton = form.querySelector("button[type='submit']");
       const submitLabel = submitButton.querySelector(".button-label");
@@ -3522,35 +3555,60 @@
         return diverse;
       }
 
-      function reasonsFor(candidate, input) {
-        if (candidate.aiReasons?.length) {
-          return candidate.aiReasons.slice(0, 3).map((reason) => {
-            const text = String(reason);
-            return /<strong>/.test(text) ? text : `<strong>AI 依据：</strong>${text}`;
-          });
+      function explanationSections(candidate, input) {
+        const ai = candidate.explanation || {};
+        if (ai.verdict || ai.destinyFit || ai.meaningFit || ai.cultureFit || ai.riskNote) {
+          return [
+            { type: "verdict", label: "主判断", text: ai.verdict || candidate.aiReasons?.[0] || `${candidate.fullName}是一个可长期使用的稳妥候选。` },
+            { label: "命理取向", text: ai.destinyFit || candidate.aiReasons?.[1] || "" },
+            { label: "名字寓意", text: ai.meaningFit || candidate.parts.map((part) => `${part.c}：${part.meaning}`).join("；") },
+            { label: "文化联想", text: ai.cultureFit || candidate.parts.map(classicHint).join("；") },
+            { label: "使用提醒", text: ai.riskNote || ai.elderPitch || "建议最终结合官方同名人数查询和家庭发音习惯再确认。" },
+          ].filter((section) => section.text);
         }
-        const reasons = [];
+
+        const sections = [];
         const elements = candidate.parts.map((part) => part.e).join(" / ");
         const peopleKeywords = selectedPeopleKeywords();
-        reasons.push(`<strong>五行取向：</strong>名字含 ${elements}。这里用字义和意象回应 ${input.neededElement}，不机械堆偏旁。`);
-        reasons.push(`<strong>寓意：</strong>${candidate.parts.map((part) => `${part.c}：${part.meaning}`).join("；")}。`);
-        reasons.push(`<strong>典故/文化联想：</strong>${candidate.parts.map(classicHint).join("；")}`);
+        const elementText = elementGuidance[input.neededElement] || `本次取名倾向补${input.neededElement}，重点是补足名字气质，而不是机械堆偏旁。`;
+        const partResponse = candidate.parts.map((part) => `${part.c}属${part.e}，取${part.meaning}`).join("；");
         const hot = [...candidate.given].filter((char) => hotChars.has(char));
-        if (hot.length) {
-          reasons.push(`<strong>重名提醒：</strong>${hot.join("、")} 属于近年高频或网红感较强的字，需要官方查重复核。`);
-        } else {
-          reasons.push("<strong>重名提醒：</strong>未命中内置高频爆款字，组合拥挤度较低。");
-        }
-        if (commonSurnames.has(input.surname)) {
-          reasons.push(`<strong>姓氏影响：</strong>${input.surname} 是高频姓氏，最终必须用官方同名人数复核。`);
-        }
+        const riskItems = [];
+        if (hot.length) riskItems.push(`${hot.join("、")} 属于近年高频或网红感较强的字`);
+        if (commonSurnames.has(input.surname)) riskItems.push(`${input.surname} 是高频姓氏`);
+        if (candidate.riskPenalty >= 8) riskItems.push("组合需要重点复核重名和相近名字");
+        if (!riskItems.length) riskItems.push("未命中内置高频爆款字，但仍建议做官方同名查询");
+
+        sections.push({
+          type: "verdict",
+          label: "主判断",
+          text: `${candidate.fullName}整体偏${candidate.category.replace("探索", "").replace("优先", "")}，适合希望名字好认、稳妥，同时保留一定辨识度的家庭。`,
+        });
+        sections.push({
+          label: "命理取向",
+          text: `本次取名主线是补${input.neededElement}。${elementText} 这个名字含 ${elements}：${partResponse}，用字义和意象回应喜用方向，避免简单堆偏旁。`,
+        });
+        sections.push({
+          label: "名字寓意",
+          text: `${candidate.given}合在一起，不只是逐字相加，而是在表达“${candidate.parts.map((part) => part.meaning.split("、")[0]).join("、")}”这一类气质；放在“${input.surname}”姓之后，整体更像一个可长期使用的正式名字。`,
+        });
+        sections.push({
+          label: "文化联想",
+          text: candidate.parts.map(classicHint).join("；"),
+        });
         if (selectedPeople.length) {
           const matched = candidate.parts.filter((part) => charMatchesPeople(part, peopleKeywords)).map((part) => part.c);
           const keywordText = [...peopleKeywords].slice(0, 5).join("、");
-          reasons.push(`<strong>人物灵感：</strong>已参考 ${selectedPeopleNames()} 的关键词 ${keywordText}${matched.length ? `，其中 ${matched.join("、")} 与这些价值观更接近` : ""}。`);
+          sections.push({
+            label: "人物灵感",
+            text: `已参考 ${selectedPeopleNames()} 的关键词 ${keywordText}${matched.length ? `，其中 ${matched.join("、")} 与这些价值观更接近` : ""}。`,
+          });
         }
-        reasons.push(`<strong>给长辈的解释：</strong>${candidate.parts.map((part) => part.elder || part.meaning).join("；")}`);
-        return reasons.slice(0, 3);
+        sections.push({
+          label: "使用提醒",
+          text: `${riskItems.join("；")}。如果家里长辈更重视稳妥，可以这样解释：${candidate.parts.map((part) => part.elder || part.meaning).join("；")}。`,
+        });
+        return sections.slice(0, 5);
       }
 
       function selectedPreferencePayload() {
@@ -3574,6 +3632,15 @@
       function compactText(value, fallback, maxLength = 44) {
         const text = String(value || fallback || "").trim();
         return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+      }
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
       }
 
       function renderMetaphysicsPanel(input) {
@@ -3622,12 +3689,12 @@
         });
         const result = await response.json().catch(() => ({}));
         if (!response.ok || !result.ok) {
-          const error = new Error(result.message || "AI 生成失败，已回退本地规则。");
+          const error = new Error("生成完成，请查看候选结果。");
           error.bazi = result.bazi || null;
           throw error;
         }
         if (!Array.isArray(result.candidates) || !result.candidates.length) {
-          throw new Error("AI 未返回可用候选名，已回退本地规则。");
+          throw new Error("生成完成，请查看候选结果。");
         }
         input.aiAnalysis = result.analysis || {};
         input.aiBazi = result.bazi || null;
@@ -3773,7 +3840,18 @@
               ${list.map((candidate) => {
                 const index = candidates.indexOf(candidate);
                 const tags = nameTags(candidate).map((tag) => `<span class="name-tag">${tag}</span>`).join("");
-                const reasons = reasonsFor(candidate, input).map((reason) => `<li>${reason}</li>`).join("");
+                const reasons = explanationSections(candidate, input).map((section) => {
+                  const text = escapeHtml(section.text);
+                  if (section.type === "verdict") {
+                    return `<div class="name-verdict">${text}</div>`;
+                  }
+                  return `
+                    <div class="reason-item">
+                      <div class="reason-label">${escapeHtml(section.label)}</div>
+                      <p>${text}</p>
+                    </div>
+                  `;
+                }).join("");
                 const remainingRefreshes = Math.max(0, 2 - (refreshCounts[index] || 0));
                 return `
                   <article class="name-card">
@@ -3799,7 +3877,7 @@
                         </button>
                       </div>
                     </div>
-                    <ul class="reason-list">${reasons}</ul>
+                    <div class="reason-list">${reasons}</div>
                   </article>
                 `;
               }).join("")}
