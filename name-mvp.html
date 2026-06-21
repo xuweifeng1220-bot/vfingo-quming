@@ -3574,14 +3574,34 @@
         return (match ? match[0] : text).trim();
       }
 
+      function compactSentences(value, maxChars = 150, maxSentences = 3) {
+        const text = String(value || "").replace(/…|\.{3}/g, "").replace(/\s+/g, " ").trim();
+        if (!text || text.length <= maxChars) return text;
+        const sentences = text.match(/[^。！？!?]+[。！？!?]?/g) || [text];
+        const picked = [];
+        for (const sentence of sentences) {
+          const next = `${picked.join("")}${sentence}`.trim();
+          if (picked.length >= maxSentences || next.length > maxChars) break;
+          picked.push(sentence);
+        }
+        if (picked.length) return picked.join("").trim();
+        return text.slice(0, maxChars).trim();
+      }
+
       function cardExplanationSections(candidate, input) {
         const sections = explanationSections(candidate, input);
         const verdict = sections.find((section) => section.type === "verdict") || sections[0];
         const wanted = ["命理取向", "名字寓意", "文化联想"];
         const body = wanted.map((label) => sections.find((section) => section.label === label)).filter(Boolean);
+        const limits = {
+          "主判断": { chars: 90, sentences: 2 },
+          "命理取向": { chars: 150, sentences: 3 },
+          "名字寓意": { chars: 150, sentences: 3 },
+          "文化联想": { chars: 150, sentences: 3 },
+        };
         return [verdict, ...body].filter(Boolean).slice(0, 4).map((section) => ({
           ...section,
-          text: firstSentence(section.text),
+          text: compactSentences(section.text, limits[section.label]?.chars || 120, limits[section.label]?.sentences || 2),
         }));
       }
 
