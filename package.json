@@ -6,8 +6,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check scripts/init-feishu.js",
-    "feishu:init": "node scripts/init-feishu.js"
+    "check": "node --check server.js && node --check scripts/init-feishu.js && node --check scripts/build-verified-person-insights.mjs && node --check scripts/validate-person-insights.mjs && node scripts/validate-person-insights.mjs",
+    "feishu:init": "node scripts/init-feishu.js",
+    "people:build": "node scripts/build-verified-person-insights.mjs",
+    "people:validate": "node scripts/validate-person-insights.mjs"
   },
   "engines": {
     "node": ">=20"

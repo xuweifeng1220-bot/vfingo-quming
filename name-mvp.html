@@ -4171,7 +4171,7 @@
         }
         const people = peopleForInput(input);
         if (!people.length) {
-          peopleGrid.innerHTML = `<div class="empty">人物灵感库未加载。请确认 name-person-insights.js 与页面在同一目录。</div>`;
+          peopleGrid.innerHTML = `<div class="empty">这一天暂无已核验的同辰人物。我们宁可留空，也不展示生日无法确认的人物。</div>`;
           return;
         }
         peopleGrid.innerHTML = people.map((person) => `
