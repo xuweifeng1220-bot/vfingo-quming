@@ -219,13 +219,6 @@ function sanitizeNameInput(input) {
       tone: String(item.tone || "").slice(0, 40),
       elements: Array.isArray(item.elements) ? item.elements.slice(0, 3).map(String) : [],
     })) : [],
-    people: Array.isArray(input.people) ? input.people.slice(0, 2).map((item) => ({
-      name: String(item.name || "").slice(0, 24),
-      field: String(item.field || "").slice(0, 24),
-      contribution: String(item.contribution || "").slice(0, 100),
-      namingHint: String(item.namingHint || "").slice(0, 100),
-      keywords: Array.isArray(item.keywords) ? item.keywords.slice(0, 6).map(String) : [],
-    })) : [],
   };
   try {
     sanitized.bazi = buildBazi(sanitized);

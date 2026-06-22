@@ -3093,19 +3093,6 @@
               </label>
             </div>
 
-            <div class="input-people-panel" id="peoplePanel">
-              <div class="input-people-head">
-                <div>
-                  <strong>同辰人物灵感</strong>
-                  <span>填写出生日期后，可选择 1-2 位人物作为价值观和典故参考。</span>
-                </div>
-                <div class="selected-people" id="selectedPeopleNote">未选择</div>
-              </div>
-              <div class="people-grid" id="peopleGrid">
-                <div class="empty">填写出生日期后，会出现同辰人物灵感。</div>
-              </div>
-            </div>
-
             <div class="grid-2">
               <label>
                 名字字数
@@ -3213,7 +3200,7 @@
             <div class="support-head">
               <div>
                 <h2>取名依据与迭代</h2>
-                <p>命理依据用于解释方向，偏好意象和人物灵感会在下一次生成时参与候选更新。</p>
+                <p>命理依据用于解释方向，偏好意象会在下一次生成时参与候选更新。</p>
               </div>
             </div>
 
@@ -3278,7 +3265,6 @@
       <article class="detail-card" id="detailCard"></article>
     </div>
 
-    <script src="name-person-insights.js"></script>
     <script>
       const DEFAULT_WEIGHTS = { destiny: 0.3, rarity: 0.3, sound: 0.15, meaning: 0.15, trend: 0.1 };
       const DEBUG_MODE = new URLSearchParams(window.location.search).has("debug");
@@ -3415,8 +3401,6 @@
       const strategy = document.querySelector("#strategy");
       const metaphysicsPanel = document.querySelector("#metaphysicsPanel");
       const shuffleImagesButton = document.querySelector("#shuffleImages");
-      const peopleGrid = document.querySelector("#peopleGrid");
-      const selectedPeopleNote = document.querySelector("#selectedPeopleNote");
       const toast = document.querySelector("#toast");
       const scorePanel = document.querySelector("#scorePanel");
       const generationOverlay = document.querySelector("#generationOverlay");
@@ -3426,8 +3410,6 @@
       let currentInput = null;
       let candidateDeck = [];
       let displayedCandidates = [];
-      let selectedPeople = [];
-      let expandedPeople = new Set();
       let selectedImageKeys = new Set();
       let refreshCounts = {};
       let toastTimer = null;
@@ -3438,7 +3420,7 @@
         const hasBaseInput = document.querySelector("#surname").value.trim()
           && document.querySelector("#birth").value
           && document.querySelector("#city").value.trim();
-        const hasTaste = selectedImageKeys.size > 0 || selectedPeople.length > 0;
+        const hasTaste = selectedImageKeys.size > 0;
         document.querySelectorAll("[data-flow-step]").forEach((item) => {
           const step = item.dataset.flowStep;
           item.classList.remove("is-active", "is-done");
@@ -3793,40 +3775,6 @@
         showToast(remaining ? `已换一个候选，还剩 ${remaining} 次` : "已换一个候选，这个位置已无刷新次数");
       }
 
-      function selectedPeopleKeywords() {
-        return new Set(selectedPeople.flatMap((person) => person.keywords || []));
-      }
-
-      function selectedPeopleNames() {
-        return selectedPeople.map((person) => person.name).join("、");
-      }
-
-      function charMatchesPeople(part, peopleKeywords) {
-        const text = `${part.meaning || ""}${part.allusion || ""}${part.elder || ""}${part.tags.join("")}`;
-        const map = [
-          ["求真", /知|明|衡|闻|清|truth|study|classic/],
-          ["明辨", /知|明|衡|闻|清/],
-          ["探索", /远|望|川|舟|知|vast|water/],
-          ["仁心", /安|怀|清|宁|soft|water/],
-          ["济世", /安|怀|清|舟|承/],
-          ["守护", /安|宁|庭|承|stable/],
-          ["创造", /昭|承|远|舟|light|modern/],
-          ["结构", /衡|庭|承|砚|stable/],
-          ["开拓", /远|望|川|舟|vast/],
-          ["文心", /言|砚|闻|知|study|classic/],
-          ["表达", /言|闻|昭|知|study/],
-          ["见识", /闻|知|望|远/],
-          ["审美", /清|岚|棠|霁|jade|classic/],
-          ["灵感", /昭|清|岚|棠|light/],
-          ["远见", /远|望|衡|知|vast/],
-          ["坚韧", /衡|承|松|宁|stable/],
-          ["自律", /衡|宁|承|安|stable/],
-          ["突破", /昭|远|川|舟|light/],
-          ["公共精神", /怀|安|承|宁/],
-        ];
-        return map.some(([keyword, pattern]) => peopleKeywords.has(keyword) && pattern.test(text));
-      }
-
       function classicHint(part) {
         const hints = {
           "知": "《道德经》有“知人者智，自知者明”，适合解释为明辨和自知。",
@@ -3852,7 +3800,6 @@
         const selected = imageOptions.filter((option) => selectedImageKeys.has(option.key));
         const selectedTags = new Set(selected.flatMap((option) => option.tags));
         const preferredElements = new Set(selected.flatMap((option) => option.elements));
-        const peopleKeywords = selectedPeopleKeywords();
         preferredElements.add(input.neededElement);
 
         const customChars = required
@@ -3904,8 +3851,7 @@
             const wishHit = input.wishes.includes(part.c) || part.tags.some((tag) => input.wishes.includes(tag)) ? 7 : 0;
             const imageHit = part.tags.some((tag) => selectedTags.has(tag)) ? 8 : 0;
             const allusionHit = part.allusion ? 6 : 0;
-            const peopleHit = charMatchesPeople(part, peopleKeywords) ? 8 : 0;
-            return sum + 64 + styleHit + wishHit + imageHit + allusionHit + peopleHit;
+            return sum + 64 + styleHit + wishHit + imageHit + allusionHit;
           }, 0) / parts.length);
           const trend = clampScore(parts.reduce((sum, part) => sum + part.trend - (hotChars.has(part.c) ? 10 : 0), 0) / parts.length);
           const writing = scoreWriting(fullName, given);
@@ -3955,7 +3901,6 @@
 
         const sections = [];
         const elements = candidate.parts.map((part) => part.e).join(" / ");
-        const peopleKeywords = selectedPeopleKeywords();
         const elementText = elementGuidance[input.neededElement] || `本次取名倾向补${input.neededElement}，重点是补足名字气质，而不是机械堆偏旁。`;
         const partResponse = candidate.parts.map((part) => `${part.c}属${part.e}，取${part.meaning}`).join("；");
         const hot = [...candidate.given].filter((char) => hotChars.has(char));
@@ -3982,14 +3927,6 @@
           label: "文化联想",
           text: candidate.parts.map(classicHint).join("；"),
         });
-        if (selectedPeople.length) {
-          const matched = candidate.parts.filter((part) => charMatchesPeople(part, peopleKeywords)).map((part) => part.c);
-          const keywordText = [...peopleKeywords].slice(0, 5).join("、");
-          sections.push({
-            label: "人物灵感",
-            text: `已参考 ${selectedPeopleNames()} 的关键词 ${keywordText}${matched.length ? `，其中 ${matched.join("、")} 与这些价值观更接近` : ""}。`,
-          });
-        }
         sections.push({
           label: "使用提醒",
           text: `${riskItems.join("；")}。如果家里长辈更重视稳妥，可以这样解释：${candidate.parts.map((part) => part.elder || part.meaning).join("；")}。`,
@@ -4002,16 +3939,6 @@
           label: option.label,
           tone: option.tone,
           elements: option.elements,
-        }));
-      }
-
-      function selectedPeoplePayload() {
-        return selectedPeople.map((person) => ({
-          name: person.name,
-          field: person.field,
-          contribution: person.contribution,
-          namingHint: person.namingHint,
-          keywords: person.keywords || [],
         }));
       }
 
@@ -4083,7 +4010,6 @@
           body: JSON.stringify({
             ...input,
             preferences: selectedPreferencePayload(),
-            people: selectedPeoplePayload(),
           }),
         });
         const result = await response.json().catch(() => ({}));
@@ -4129,19 +4055,6 @@
         return result;
       }
 
-      function dateKeyFromBirth(birthValue) {
-        const date = birthValue ? new Date(birthValue) : new Date();
-        return `${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-      }
-
-      function peopleForInput(input) {
-        const key = dateKeyFromBirth(input?.birth);
-        const source = window.NAME_PERSON_INSIGHTS || {};
-        const list = source[key] || [];
-        if (!list.length) return [];
-        return list.slice(0, 4);
-      }
-
       function regenerateFromCurrentInput() {
         if (!currentInput) return;
         refreshCounts = {};
@@ -4149,66 +4062,6 @@
         displayedCandidates = selectInitialCandidates(candidateDeck);
         shouldAnimateResults = true;
         render(currentInput, displayedCandidates);
-      }
-
-      function togglePerson(person) {
-        const exists = selectedPeople.some((item) => item.name === person.name);
-        if (exists) {
-          selectedPeople = selectedPeople.filter((item) => item.name !== person.name);
-        } else {
-          selectedPeople = [...selectedPeople, person].slice(-2);
-        }
-        updateFlowState();
-        renderPeople(currentDraftInput());
-        markInputChanged("人物灵感已更新，重新点击免费生成后生效");
-      }
-
-      function renderPeople(input) {
-        if (!input?.birth) {
-          peopleGrid.innerHTML = `<div class="empty">填写出生日期后，会出现同辰人物灵感。</div>`;
-          selectedPeopleNote.textContent = selectedPeople.length ? `已选择：${selectedPeopleNames()}` : "未选择";
-          return;
-        }
-        const people = peopleForInput(input);
-        if (!people.length) {
-          peopleGrid.innerHTML = `<div class="empty">这一天暂无已核验的同辰人物。我们宁可留空，也不展示生日无法确认的人物。</div>`;
-          return;
-        }
-        peopleGrid.innerHTML = people.map((person) => `
-          <article class="person-card" aria-pressed="${selectedPeople.some((item) => item.name === person.name)}" aria-expanded="${expandedPeople.has(person.name)}">
-            <div class="person-title">
-              <button class="person-check" type="button" aria-label="选择 ${person.name}" data-person-select="${person.name}">✓</button>
-              <div>
-                <h3>${person.name}</h3>
-                <div class="person-meta">${person.region}｜${person.field}｜${person.date}</div>
-              </div>
-            </div>
-            <div class="person-keywords">${(person.keywords || []).map((keyword) => `<span>${keyword}</span>`).join("")}</div>
-            <div class="person-detail">
-              <p>${person.contribution}</p>
-              <p><strong>命名启发：</strong>${person.namingHint}</p>
-            </div>
-            <button class="person-expand" type="button" data-person-expand="${person.name}">${expandedPeople.has(person.name) ? "收起详情" : "展开典故"}</button>
-          </article>
-        `).join("");
-        selectedPeopleNote.textContent = selectedPeople.length
-          ? `已选择：${selectedPeopleNames()}`
-          : "可选择 1-2 位人物作为价值观灵感";
-        peopleGrid.querySelectorAll("[data-person-select]").forEach((button) => {
-          button.addEventListener("click", () => {
-            const person = people.find((item) => item.name === button.dataset.personSelect);
-            if (!person) return;
-            togglePerson(person);
-          });
-        });
-        peopleGrid.querySelectorAll("[data-person-expand]").forEach((button) => {
-          button.addEventListener("click", () => {
-            const name = button.dataset.personExpand;
-            if (expandedPeople.has(name)) expandedPeople.delete(name);
-            else expandedPeople.add(name);
-            renderPeople(input);
-          });
-        });
       }
 
       function debugPanelHtml(input, candidates) {
@@ -4247,7 +4100,6 @@
           <div class="strategy-item"><span>决策动作</span><strong>复制姓名后官方查重</strong></div>
         `;
         renderMetaphysicsPanel(input);
-        renderPeople(input);
         updateFlowState("result");
 
         if (!candidates.length) {
@@ -4456,18 +4308,11 @@
 
       selectedImageKeys = new Set();
       renderImageChips();
-      renderPeople(currentDraftInput());
       ["#surname", "#birth", "#city"].forEach((selector) => {
         document.querySelector(selector).addEventListener("input", () => updateFlowState());
       });
       document.querySelector("#birth").addEventListener("input", () => {
-        selectedPeople = [];
-        expandedPeople = new Set();
-        renderPeople(currentDraftInput());
-        markInputChanged("出生日期已更新，人物灵感已重置，重新点击免费生成后生效");
-      });
-      document.querySelector("#city").addEventListener("input", () => {
-        renderPeople(currentDraftInput());
+        markInputChanged("出生日期已更新，重新点击免费生成后生效");
       });
       updateFlowState();
     </script>
