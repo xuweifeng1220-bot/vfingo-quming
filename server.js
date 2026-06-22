@@ -19,6 +19,7 @@ const DEEPSEEK_TIMEOUT_MS = Number(process.env.DEEPSEEK_TIMEOUT_MS || 90_000);
 const AI_FREE_GENERATION_LIMIT = Number(process.env.AI_FREE_GENERATION_LIMIT || 2);
 const AI_DAILY_GLOBAL_LIMIT = Number(process.env.AI_DAILY_GLOBAL_LIMIT || 500);
 const SITE_ENTRY = process.env.SITE_ENTRY || "index.html";
+const ADSENSE_CLIENT = String(process.env.ADSENSE_CLIENT || "").trim();
 const ROOT = __dirname;
 const LEADS_FILE = path.join(ROOT, "leads.json");
 const AI_USAGE_FILE = path.join(ROOT, "name-ai-usage.json");
@@ -435,10 +436,15 @@ function serveStatic(req, res) {
     }
 
     const ext = path.extname(filePath).toLowerCase();
+    let body = data;
+    if (ext === ".html" && /^ca-pub-\d+$/.test(ADSENSE_CLIENT)) {
+      const script = `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}" crossorigin="anonymous"></script>`;
+      body = Buffer.from(String(data).replace("</head>", `  ${script}\n  </head>`), "utf8");
+    }
     res.writeHead(200, {
       "Content-Type": MIME_TYPES[ext] || "application/octet-stream",
     });
-    res.end(data);
+    res.end(body);
   });
 }
 
@@ -492,6 +498,10 @@ const server = http.createServer(async (req, res) => {
         `<?xml version="1.0" encoding="UTF-8"?>\n` +
           `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
           `  <url><loc>${origin}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>\n` +
+          `  <url><loc>${origin}/about.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>\n` +
+          `  <url><loc>${origin}/privacy.html</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>\n` +
+          `  <url><loc>${origin}/disclaimer.html</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>\n` +
+          `  <url><loc>${origin}/contact.html</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>\n` +
           `</urlset>\n`,
       );
       return;

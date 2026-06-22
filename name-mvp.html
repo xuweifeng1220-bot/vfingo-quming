@@ -2983,6 +2983,59 @@
         justify-content: flex-end;
       }
 
+      .seo-block {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin: 0 0 48px;
+      }
+
+      .seo-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.76);
+        padding: 18px;
+      }
+
+      .seo-card h2 {
+        color: var(--accent-dark);
+        font-size: 18px;
+      }
+
+      .seo-card p {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .site-footer {
+        position: relative;
+        z-index: 1;
+        border-top: 1px solid var(--line);
+        padding: 24px 0 34px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .footer-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+      }
+
+      .footer-links a {
+        color: var(--accent-dark);
+        font-weight: 800;
+        text-decoration: none;
+      }
+
       @media (hover: hover) and (pointer: fine) {
         .icon-button:hover {
           border-color: rgba(21, 95, 82, 0.52);
@@ -2994,6 +3047,15 @@
       @media (max-width: 620px) {
         .guide-steps {
           grid-template-columns: 1fr;
+        }
+
+        .seo-block {
+          grid-template-columns: 1fr;
+        }
+
+        .footer-inner {
+          align-items: flex-start;
+          flex-direction: column;
         }
       }
 
@@ -3250,7 +3312,34 @@
           </div>
         </div>
       </section>
+
+      <section class="seo-block" aria-label="取名方法说明">
+        <article class="seo-card">
+          <h2>为什么要结合出生信息</h2>
+          <p>出生时间和城市用于形成传统命理参考，但取名不是机械补偏旁，而是把五行取向转译成字义、音律和可长期使用的气质。</p>
+        </article>
+        <article class="seo-card">
+          <h2>为什么要官方查重</h2>
+          <p>本站会先避开高频字和热门组合，最终同名人数仍建议通过公安一网通办或相关 APP 复核，降低撞名风险。</p>
+        </article>
+        <article class="seo-card">
+          <h2>为什么重视解释</h2>
+          <p>好名字需要能讲给父母、长辈和孩子听：既有寓意，也要好读、好写、不过分猎奇，并能经得起时间审美。</p>
+        </article>
+      </section>
     </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <span>取名决策雷达提供传统文化取名参考，不构成命运承诺或官方查重结果。</span>
+        <nav class="footer-links" aria-label="网站信息">
+          <a href="/about.html">关于我们</a>
+          <a href="/privacy.html">隐私政策</a>
+          <a href="/disclaimer.html">免责声明</a>
+          <a href="/contact.html">联系我们</a>
+        </nav>
+      </div>
+    </footer>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="generation-overlay" id="generationOverlay" role="status" aria-live="polite" aria-hidden="true">
       <div class="generation-card">
